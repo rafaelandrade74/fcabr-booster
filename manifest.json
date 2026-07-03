@@ -13,13 +13,20 @@
   "content_scripts": [
     {
       "matches": [
-        "https://fcabr.net/pt/profile*",
-        "https://fcabr.net/en/profile*"
+        "https://fcabr.net/*"
+      ],
+      "exclude_matches": [
+        "https://fcabr.net/api/auth/*"
       ],
       "js": [
-        "scripts/content-scripts/info-player.js"
+        "scripts/content-scripts/content.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_start"
+    }
+  ],"web_accessible_resources": [
+    {
+      "resources": ["scripts/content-scripts/inject.js"],
+      "matches": ["https://fcabr.net/*"]
     }
   ],
   "action": {
