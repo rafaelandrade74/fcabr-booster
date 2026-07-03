@@ -1,0 +1,115 @@
+:root {
+  color-scheme: light;
+  --bg: #0a0a0c;
+  --surface: rgba(14, 14, 16, 0.92);
+  --surface-strong: #121216;
+  --text: #f5f6f8;
+  --muted: #b6bcc8;
+  --accent: #c9ff3f;
+  --accent-hover: #b8eb31;
+  --border: rgba(255, 255, 255, 0.08);
+  --shadow: 0 24px 50px rgba(0, 0, 0, 0.42);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-width: 320px;
+  margin: 0;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(201, 255, 63, 0.18), transparent 38%),
+    radial-gradient(circle at bottom, rgba(255, 204, 0, 0.1), transparent 30%),
+    linear-gradient(180deg, #111114 0%, var(--bg) 100%);
+  color: var(--text);
+}
+
+.popup {
+  padding: 14px;
+}
+
+.card {
+  min-width: 320px;
+  max-width: 360px;
+  padding: 16px 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(20, 20, 24, 0.96), rgba(10, 10, 12, 0.98));
+  box-shadow: var(--shadow);
+}
+
+.brand {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 12px;
+}
+
+.brand-logo {
+  display: block;
+  width: 100%;
+  max-width: 312px;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.description {
+  margin: 0 0 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.demo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-hover));
+  color: #0d100a;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.demo-button:hover {
+  box-shadow: 0 12px 20px rgba(201, 255, 63, 0.16);
+}
+
+.demo-button:active {
+  transform: translateY(1px);
+}
+
+.demo-button:focus-visible {
+  outline: 3px solid rgba(201, 255, 63, 0.3);
+  outline-offset: 2px;
+}
