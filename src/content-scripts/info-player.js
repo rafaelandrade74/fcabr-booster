@@ -1,21 +1,20 @@
 import { initializeStoredValues } from "../utils";
-import { getTranslations, resolveLanguage } from "../translations";
+import { getTranslations, resolveSelectedLanguage } from "../translations";
+
+const SUPPORTED_PROFILE_PAGE_REGEX = /^\/(?:pt|en)\/profile\/?(?:\?.*)?$/;
 
 async function bootstrapInfoPlayer() {
-  const pathname = window.location.pathname;
-  const isSupportedProfilePage =
-    pathname === "/pt/profile" ||
-    pathname === "/pt/profile/" ||
-    pathname.startsWith("/pt/profile?") ||
-    pathname === "/en/profile" ||
-    pathname === "/en/profile/" ||
-    pathname.startsWith("/en/profile?");
+  const currentPath = `${window.location.pathname}${window.location.search}`;
+  const isSupportedProfilePage = SUPPORTED_PROFILE_PAGE_REGEX.test(currentPath);
 
   if (!isSupportedProfilePage) {
     return;
   }
 
-  const language = resolveLanguage(document.documentElement.lang || pathname);
+  const language = resolveSelectedLanguage(
+    window.location.pathname,
+    document.documentElement.lang,
+  );
   const translations = getTranslations(language);
 
   await initializeStoredValues({

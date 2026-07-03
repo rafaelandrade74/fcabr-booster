@@ -6,14 +6,27 @@ const translations = {
   en,
 };
 
-export function resolveLanguage(value = "") {
+function getLanguageFromValue(value = "") {
   const normalized = String(value).toLowerCase();
+  const match = normalized.match(/^\/(en|pt)(?:\/|$)/);
 
-  if (normalized.startsWith("en")) {
-    return "en";
+  if (match) {
+    return match[1];
   }
 
-  return "pt";
+  return null;
+}
+
+export function resolveLanguage(value = "") {
+  return getLanguageFromValue(value) || "pt";
+}
+
+export function resolveSelectedLanguage(pathname = "", documentLang = "") {
+  return (
+    getLanguageFromValue(pathname) ||
+    getLanguageFromValue(documentLang) ||
+    "pt"
+  );
 }
 
 export function getTranslations(language = "pt") {
