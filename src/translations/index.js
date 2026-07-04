@@ -1,26 +1,38 @@
-import pt from "./pt.json";
-import en from "./en.json";
+import pt from "./pt";
+import en from "./en";
 
+/**
+ * @typedef {"pt" | "en"} LanguageKey
+ */
+
+/**
+ * @typedef {pt | en } Translations
+ */
 const translations = {
   pt,
   en,
 };
 
+/**
+ * @param {string} [value]
+ * @returns {LanguageKey | null}
+ */
 function getLanguageFromValue(value = "") {
   const normalized = String(value).toLowerCase();
   const match = normalized.match(/^\/(en|pt)(?:\/|$)/);
 
   if (match) {
-    return match[1];
+    return /** @type {LanguageKey} */ (match[1]);
   }
 
   return null;
 }
 
-export function resolveLanguage(value = "") {
-  return getLanguageFromValue(value) || "pt";
-}
-
+/**
+ * @param {string} [pathname]
+ * @param {string} [documentLang]
+ * @returns {LanguageKey}
+ */
 export function resolveSelectedLanguage(pathname = "", documentLang = "") {
   return (
     getLanguageFromValue(pathname) ||
@@ -28,7 +40,20 @@ export function resolveSelectedLanguage(pathname = "", documentLang = "") {
     "pt"
   );
 }
+/**
+ * @param {string} [pathname]
+ * @param {string} [documentLang]
+ * @returns {Translations}
+ */
+export function getTranslations(pathname = "", documentLang = "") {
+  const language = resolveSelectedLanguage(pathname, documentLang);
+  return getTranslationsByLanguage(language);
+}
 
-export function getTranslations(language = "pt") {
+/**
+ * @param {LanguageKey} language
+ * @returns {Translations}
+ */
+export function getTranslationsByLanguage(language = "pt") {
   return translations[language] || translations.pt;
 }

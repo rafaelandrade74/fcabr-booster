@@ -1,9 +1,11 @@
 export async function initializeStoredValues(defaultValues = {}) {
-  if (!globalThis.chrome?.storage?.local) {
+  const storageArea = globalThis.chrome?.storage?.local;
+
+  if (!storageArea) {
     return defaultValues;
   }
 
-  const storedValues = await chrome.storage.local.get(null);
+  const storedValues = await storageArea.get(null);
   const missingValues = {};
 
   for (const [key, value] of Object.entries(defaultValues)) {
@@ -13,7 +15,7 @@ export async function initializeStoredValues(defaultValues = {}) {
   }
 
   if (Object.keys(missingValues).length > 0) {
-    await chrome.storage.local.set(missingValues);
+    await storageArea.set(missingValues);
   }
 
   return {

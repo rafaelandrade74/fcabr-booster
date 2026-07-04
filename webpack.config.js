@@ -6,7 +6,6 @@ module.exports = (_, argv = {}) => ({
   mode: argv.mode || "production",
   entry: {
     popup: path.resolve(__dirname, "src/options/popup.js"),
-    "content-scripts/info-player": path.resolve(__dirname,"src/content-scripts/info-player.js",),
     "content-scripts/content": path.resolve(__dirname,"src/content-scripts/content.js",),
     "content-scripts/inject": path.resolve(__dirname,"src/content-scripts/inject.js",),
   },

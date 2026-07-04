@@ -8,16 +8,44 @@
   </head>
   <body>
     <main class="popup" aria-labelledby="popup-title">
-      <section class="card">
-        <div class="brand">
-          <img class="brand-logo" src="images/logo.png" alt="FCABR Booster" />
-        </div>
-        <p class="eyebrow">Extensao local</p>
-        <h1 id="popup-title">FCABR Booster</h1>
-        <p class="description">
-          Base inicial da extensao, pronta para futuras melhorias sem depender de servicos externos.
-        </p>
-        <button type="button" class="demo-button" data-action="demo">Botao de exemplo</button>
+      <section class="shell" data-app hidden>
+        <header class="hero">
+          <p class="eyebrow">Extensão</p>
+          <h1 id="popup-title">FCABR Booster</h1>
+          <p class="description">Ajustes rápidos para a correção de patentes.</p>
+        </header>
+
+        <section class="panel" aria-labelledby="patents-title">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Configuração</p>
+              <h2 id="patents-title">Próxima patente</h2>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <p class="setting-title">Mostrar próxima patente</p>
+              <p class="setting-help">Ative para exibir a próxima patente no cartão de experiência.</p>
+            </div>
+
+            <label class="switch" for="show-next-patent">
+              <input id="show-next-patent" type="checkbox" />
+              <span class="switch-track" aria-hidden="true">
+                <span class="switch-thumb"></span>
+              </span>
+              <span class="switch-label" data-switch-label>Ativado</span>
+            </label>
+          </div>
+
+          <button id="save-settings" class="save-button" type="button">Salvar e atualizar</button>
+        </section>
+      </section>
+
+      <section class="shell shell--restricted" data-restricted hidden aria-live="polite">
+        <p class="eyebrow">Uso restrito</p>
+        <h1>FCABR Booster</h1>
+        <p class="description">Esta extensão só funciona no domínio fcabr.net.</p>
       </section>
     </main>
   </body>
