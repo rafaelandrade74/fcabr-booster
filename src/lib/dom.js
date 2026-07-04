@@ -63,6 +63,11 @@ export default class DOM {
             .find(el => el.textContent.trim() === text);
     }
 
+    static byTextVisible(selector, text, parent = document) {
+        return this.$$(selector, parent)
+            .find(el => el.textContent.trim() === text && el.offsetParent !== null);
+    }
+
     static containsText(selector, text, parent = document) {
         return this.$$(selector, parent)
             .find(el => el.textContent.includes(text));

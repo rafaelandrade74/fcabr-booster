@@ -9,7 +9,7 @@
         const url =
             typeof args[0] === "string"
                 ? args[0]
-                : args[0].url;
+                : args[0]?.url ?? "";
 
         if (!url.includes("/api/")) {
             return response;
