@@ -35,7 +35,6 @@ window.addEventListener("message", async event => {
 
     StorageService.set(route.storageKey, event.data.data);
 
-    console.log("Renderizando a página através da mensagem recebida do script injetado");
     // renderizar a página novamente para atualizar os dados exibidos
     renderPage();
 });
@@ -72,23 +71,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Fallback para casos onde o framework altera a URL sem disparar os eventos acima
     setInterval(checkUrlChange, 200);
-    console.log("Renderizando a página através da mudança de URL");
     renderPage();
 });
 // atualizar os componentes da página quando a janela for redimensionada
 let isMobile = window.innerWidth <= 1023;
 window.addEventListener("resize", () => {
-
     const mobile = window.innerWidth <= 1023;
-    console.log("mobile", mobile, "isMobile", isMobile);
-    console.log("window.innerWidth", window.innerWidth);
+
     if (mobile === isMobile)
         return;
 
     isMobile = mobile;
 
-    console.log("Mudou de layout");
-
     renderPage();
-
 });
