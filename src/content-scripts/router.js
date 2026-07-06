@@ -1,9 +1,8 @@
-import { profilePage } from "./routes/profile.js";
+import { apiRoutes } from "../data/api-routes.js";
+import { pageRoutes } from "../data/page-routes.js";
 
-export const apiRoutes = [
-    {
-        regex: /\/api\/goa-rank-status\?.*oidUser=\d+/,
-        handler: profilePage
-    }
-];
+export const routes = {
+    ApiRoutes: apiRoutes,
+    PageRoutes: pageRoutes
+}
 
