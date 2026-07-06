@@ -4,20 +4,16 @@ import patentes from "../../data/patents";
 import { initializeStoredValues } from "../../utils";
 import { DEFAULT_SETTINGS } from "../../utils/settings";
 import { getTranslations } from "../../translations";
+import StorageService from "../../lib/storage-service";
+import { RouteKeys } from "../../data/routekeys.js";
 
 const SUPPORTED_PROFILE_PAGE_REGEX = /^\/(?:pt|en)\/profile\/?(?:\?.*)?$/;
-/**
- * @param {Object} data
- * @param {Object} data.data
- * @param {string} data.data.patenteAtual
- * @param {number} data.data.exp
- * @param {number} data.data.expNecessario
- */
-export async function profilePage(data) {
+
+export async function profilePage() {
     const currentPath = `${window.location.pathname}${window.location.search}`;
     const isSupportedProfilePage = SUPPORTED_PROFILE_PAGE_REGEX.test(currentPath);
     if (!isSupportedProfilePage) return;
-    
+
     /**
      * @type {Translations}
      */
@@ -35,7 +31,15 @@ export async function profilePage(data) {
 
     // Aguardar até que o elemento de Experiência esteja presente na página.
     await DOM.waitUntil(() => DOM.byTextVisible("span", "Experiência"));
-
+    /**
+     * @param {Object} data
+     * @param {Object} data.data
+     * @param {string} data.data.patenteAtual
+     * @param {number} data.data.exp
+     * @param {number} data.data.expNecessario
+     */
+    const data = StorageService.get(RouteKeys.GoaRankStatus);
+    console.log("data", data);
     const currentPatent = patentes.find((patent) => patent.name === data.data.patenteAtual);
 
     if (!currentPatent) {

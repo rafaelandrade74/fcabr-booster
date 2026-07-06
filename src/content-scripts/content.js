@@ -1,7 +1,6 @@
 import { routes } from "./router.js";
 import { profilePage } from "./routes/profile.js";
 import StorageService from "../lib/storage-service.js";
-import { RouteKeys } from "../data/routekeys.js";
 
 const script = document.createElement("script");
 
@@ -26,31 +25,51 @@ window.addEventListener("message", async event => {
     StorageService.set(route.storageKey, event.data.data);
 });
 
+let lastUrl = location.href;
 
 function start() {
-    let timeout;
-    let lastUrl = location.href;
 
-    const observer = new MutationObserver(() => {
-        clearTimeout(timeout);
+    const checkUrlChange = () => {
 
-        timeout = setTimeout(() => {
-            onPageChanged();
-        }, 200);
-    });
+        if (location.href === lastUrl)
+            return;
 
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
+        lastUrl = location.href;
+
+        onPageChanged();
+    };
+
+    // Navegação SPA
+    const pushState = history.pushState;
+    history.pushState = function (...args) {
+        pushState.apply(this, args);
+        checkUrlChange();
+    };
+
+    const replaceState = history.replaceState;
+    history.replaceState = function (...args) {
+        replaceState.apply(this, args);
+        checkUrlChange();
+    };
+
+    // Voltar/avançar navegador
+    window.addEventListener("popstate", checkUrlChange);
+
+    // Fallback para casos onde o framework altera a URL sem disparar os eventos acima
+    setInterval(checkUrlChange, 200);
+
+    // Primeira renderização
+    onPageChanged();
 }
+
 function onPageChanged() {
+
     const route = routes.PageRoutes.find(r => r.regex.test(location.pathname));
-    if (route) {
-        const resultado = StorageService.get(RouteKeys.GoaRankStatus);
-        console.log("resultado", resultado);
-        route.handler(resultado);
-    }
+
+    if (!route)
+        return;
+
+    route.handler();
 }
 
 window.addEventListener("DOMContentLoaded", start);
