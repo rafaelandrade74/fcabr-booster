@@ -9,6 +9,17 @@ script.onload = () => script.remove();
 
 (document.head || document.documentElement).appendChild(script);
 
+
+function renderPage() {
+
+    const route = routes.PageRoutes.find(r => r.regex.test(location.pathname));
+
+    if (!route)
+        return;
+
+    route.handler();
+}
+
 window.addEventListener("message", async event => {
 
     if (event.source !== window)
@@ -23,11 +34,15 @@ window.addEventListener("message", async event => {
         return;
 
     StorageService.set(route.storageKey, event.data.data);
+
+    console.log("Renderizando a página através da mensagem recebida do script injetado");
+    // renderizar a página novamente para atualizar os dados exibidos
+    renderPage();
 });
 
 let lastUrl = location.href;
-
-function start() {
+// atualizar os componentes da página quando a url mudar (navegação SPA)
+window.addEventListener("DOMContentLoaded", () => {
 
     const checkUrlChange = () => {
 
@@ -36,7 +51,7 @@ function start() {
 
         lastUrl = location.href;
 
-        onPageChanged();
+        renderPage();
     };
 
     // Navegação SPA
@@ -57,19 +72,23 @@ function start() {
 
     // Fallback para casos onde o framework altera a URL sem disparar os eventos acima
     setInterval(checkUrlChange, 200);
+    console.log("Renderizando a página através da mudança de URL");
+    renderPage();
+});
+// atualizar os componentes da página quando a janela for redimensionada
+let isMobile = window.innerWidth <= 1023;
+window.addEventListener("resize", () => {
 
-    // Primeira renderização
-    onPageChanged();
-}
-
-function onPageChanged() {
-
-    const route = routes.PageRoutes.find(r => r.regex.test(location.pathname));
-
-    if (!route)
+    const mobile = window.innerWidth <= 1023;
+    console.log("mobile", mobile, "isMobile", isMobile);
+    console.log("window.innerWidth", window.innerWidth);
+    if (mobile === isMobile)
         return;
 
-    route.handler();
-}
+    isMobile = mobile;
 
-window.addEventListener("DOMContentLoaded", start);
+    console.log("Mudou de layout");
+
+    renderPage();
+
+});

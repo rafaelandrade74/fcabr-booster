@@ -8,7 +8,7 @@ export default class ExperienceCard {
 
         /** @type {HTMLElement | null} */
         this.card = [...document.querySelectorAll("span")]
-            .find((e) => e.textContent === this.translations.Profile["xp-label"] && e.offsetParent !== null)
+            .find((e) => e.textContent.trim() === this.translations.Profile["xp-label"] && e.offsetParent !== null)
             ?.closest(".p-2") || null;
     }
 

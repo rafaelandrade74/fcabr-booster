@@ -15,6 +15,17 @@ export async function profilePage() {
     if (!isSupportedProfilePage) return;
 
     /**
+     * @param {Object} data
+     * @param {Object} data.data
+     * @param {string} data.data.patenteAtual
+     * @param {number} data.data.exp
+     * @param {number} data.data.expNecessario
+     */
+    const data = StorageService.get(RouteKeys.GoaRankStatus);
+
+    if (!data) return;
+
+    /**
      * @type {Translations}
      */
     const translations = getTranslations(
@@ -30,16 +41,8 @@ export async function profilePage() {
     }
 
     // Aguardar até que o elemento de Experiência esteja presente na página.
-    await DOM.waitUntil(() => DOM.byTextVisible("span", "Experiência"));
-    /**
-     * @param {Object} data
-     * @param {Object} data.data
-     * @param {string} data.data.patenteAtual
-     * @param {number} data.data.exp
-     * @param {number} data.data.expNecessario
-     */
-    const data = StorageService.get(RouteKeys.GoaRankStatus);
-    console.log("data", data);
+    await DOM.waitUntil(() => DOM.byTextVisible("span", translations.Profile["xp-label"])?.closest(".p-2") || null, 10000);
+
     const currentPatent = patentes.find((patent) => patent.name === data.data.patenteAtual);
 
     if (!currentPatent) {
