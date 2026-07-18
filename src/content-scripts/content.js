@@ -47,7 +47,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
         if (location.href === lastUrl)
             return;
-
+        
         lastUrl = location.href;
 
         renderPage();

@@ -1,3 +1,5 @@
+import DOM from "./dom";
+
 export default class ExperienceCard {
     /**
      * @param {Translations} translations
@@ -7,19 +9,27 @@ export default class ExperienceCard {
         this.translations = translations;
 
         /** @type {HTMLElement | null} */
-        this.card = [...document.querySelectorAll("span")]
-            .find((e) => e.textContent.trim() === this.translations.Profile["xp-label"] && e.offsetParent !== null)
-            ?.closest(".p-2") || null;
+        this.card = ExperienceCard.findCardElement(translations);
+    }
+
+    /**
+     * @param {Translations} translations
+     * @returns {HTMLElement | null}
+     */
+    static findCardElement(translations) {
+        const elementFounded = DOM.byTextVisible("div.inline-flex.rounded.border > button", translations.Profile["xp-label"]);
+        return elementFounded?.closest("div.rounded-lg") || null;
     }
 
     /** @returns {HTMLElement | null} */
-    get footer() {
+    getFooter() {
         return this.card?.querySelector(".pt-2") || null;
     }
 
-    /** @returns {NodeListOf<HTMLSpanElement>} */
-    get spans() {
-        return this.footer?.querySelectorAll("span") || /** @type {NodeListOf<HTMLSpanElement>} */ (document.createDocumentFragment().querySelectorAll("span"));
+    /** @returns {Array<HTMLSpanElement>} */
+    getFooterSpans() {
+        let footer = this.getFooter();
+        return footer ? Array.from(footer.querySelectorAll("span")) : [];
     }
 
     /**
@@ -31,7 +41,10 @@ export default class ExperienceCard {
             return;
         }
 
-        this.spans[0].textContent = formatXP(xp, this.translations.lang);
+        const spans = this.getFooterSpans();
+        if (spans[0]) {
+            spans[0].textContent = formatXP(xp, this.translations.lang);
+        }
     }
 
     /**
@@ -43,7 +56,9 @@ export default class ExperienceCard {
             return;
         }
         const remainingLabel = this.translations?.Profile?.["xp-remaining-bg"] || "XP restante";
-        this.spans[1].textContent = `${formatXP(xp, this.translations.lang)} ${remainingLabel}`;
+
+        const spans = this.getFooterSpans();
+        if (spans[1]) spans[1].textContent = `${formatXP(xp, this.translations.lang)} ${remainingLabel}`;
     }
 
     /**
@@ -54,7 +69,10 @@ export default class ExperienceCard {
             console.warn("Next XP is undefined or null");
             return;
         }
-        this.spans[2].textContent = formatXP(xp, this.translations.lang);
+        const spans = this.getFooterSpans();
+        if (spans[2]) {
+            spans[2].textContent = formatXP(xp, this.translations.lang);
+        }
     }
 
     /** @returns {HTMLElement | null} */

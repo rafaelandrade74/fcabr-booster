@@ -41,7 +41,12 @@ export async function profilePage() {
     }
 
     // Aguardar até que o elemento de Experiência esteja presente na página.
-    await DOM.waitUntil(() => DOM.byTextVisible("span", translations.Profile["xp-label"])?.closest(".p-2") || null, 10000);
+    await DOM.waitUntil(() => ExperienceCard.findCardElement(translations), 10000);
+
+    const cardElement = ExperienceCard.findCardElement(translations);
+    if (!cardElement) {
+        return;
+    }
 
     const currentPatent = patentes.find((patent) => patent.name === data.data.patenteAtual);
 
@@ -55,6 +60,7 @@ export async function profilePage() {
     const remainingExperiencePoints = Math.max(0, nextExperiencePoints - currentExperiencePoints);
 
     const card = new ExperienceCard(translations);
+    
     card.setBaseXp(baseExperiencePoints);
     card.setRemaining(remainingExperiencePoints);
     card.setNextXp(nextExperiencePoints);
