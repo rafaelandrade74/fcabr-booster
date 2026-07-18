@@ -1,6 +1,7 @@
 import { routes } from "./router.js";
 import { profilePage } from "./routes/profile.js";
 import StorageService from "../lib/storage-service.js";
+import { RouteKeys } from "../data/routekeys.js";
 
 const script = document.createElement("script");
 
@@ -33,7 +34,12 @@ window.addEventListener("message", async event => {
     if (!route)
         return;
 
-    StorageService.set(route.storageKey, event.data.data);
+    let storageKey = route.storageKey(event.data.data);
+    
+    if (!storageKey)
+        return;
+
+    StorageService.set(storageKey, event.data.data);
 
     // renderizar a página novamente para atualizar os dados exibidos
     renderPage();
@@ -47,7 +53,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
         if (location.href === lastUrl)
             return;
-        
+
         lastUrl = location.href;
 
         renderPage();

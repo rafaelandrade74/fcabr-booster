@@ -3,21 +3,45 @@ import DOM from "./dom";
 export default class ExperienceCard {
     /**
      * @param {Translations} translations
+     * @param {string} tipoPerfil
      */
-    constructor(translations) {
+    constructor(translations, tipoPerfil) {
         /** @type {Translations} */
         this.translations = translations;
 
         /** @type {HTMLElement | null} */
-        this.card = ExperienceCard.findCardElement(translations);
+        this.card = ExperienceCard.findCardElementByName(translations, tipoPerfil);
+    }
+
+    /**
+     * @param {Translations} translations
+     * @param {string} name
+     * @returns {HTMLElement | null}
+     */
+    static findCardElementByName(translations, name) {
+        const tipo = {
+            PF: ExperienceCard.findCardElementPerfil,
+            PFP: ExperienceCard.findCardElementPerfilPrincipal,
+        };
+
+        return tipo[name]?.(translations) ?? null;
     }
 
     /**
      * @param {Translations} translations
      * @returns {HTMLElement | null}
      */
-    static findCardElement(translations) {
-        const elementFounded = DOM.byTextVisible("div.inline-flex.rounded.border > button", translations.Profile["xp-label"]);
+    static findCardElementPerfil(translations) {
+        const elementFounded = DOM.byTextVisible("span", translations.Profile["xp-label"]);
+        return elementFounded?.closest("div.rounded-lg") || null;
+    }
+
+    /**
+     * @param {Translations} translations
+     * @returns {HTMLElement | null}
+     */
+    static findCardElementPerfilPrincipal(translations) {
+        const elementFounded = DOM.byTextVisible("div.inline-flex.rounded.border > button", translations.Profile["xp-label-btn"]);
         return elementFounded?.closest("div.rounded-lg") || null;
     }
 
@@ -51,6 +75,7 @@ export default class ExperienceCard {
      * @param {number} xp
      */
     setRemaining(xp) {
+        if (xp === 0) return;
         if (xp === undefined || xp === null) {
             console.warn("Remaining XP is undefined or null");
             return;

@@ -7,13 +7,87 @@ import { getTranslations } from "../../translations";
 import StorageService from "../../lib/storage-service";
 import { RouteKeys } from "../../data/routekeys.js";
 
-const SUPPORTED_PROFILE_PAGE_REGEX = /^\/(?:pt|en)\/profile\/?(?:\?.*)?$/;
+/**
+ * Retorna o tipo da página de perfil.
+ *
+ * PF  = /pt/profile/NomeDoJogador
+ * PFP = /pt/profile
+ *
+ * @param {string} pathname
+ * @returns {string}
+ */
+function getProfilePageType(pathname = window.location.pathname) {
+    const match = pathname.match(/^\/[a-z]{2}\/profile(?:\/([^/]+))?$/);
+
+    if (!match) {
+        return null;
+    }
+
+    return match;
+}
+
+/**
+ * @param {object}
+ * @returns {string}
+ */
+export function storageKeyGoaRankStatus(data) {
+    const profileValue = getProfileId();
+
+    const oidUser = data.data.oidUser;
+    const nickname = data.data.nickname;
+    const result = oidUser === profileValue
+        ? RouteKeyProfile(oidUser)
+        : RouteKeyProfile(nickname);
+
+    return result;
+}
+/**
+ * 
+ * @returns {string}
+ */
+function getProfileId() {
+    const profileKey = Object.keys(localStorage)
+        .find(k => k.startsWith("selected-profile-"));
+
+    if (!profileKey)
+        return null;
+
+    const profileValue = Number(localStorage.getItem(profileKey));
+
+    if (Number.isNaN(profileValue))
+        return null;
+
+    return profileValue;
+}
+
+/**
+ * 
+ * @param {any|null} name 
+ * @returns {string}
+ */
+function RouteKeyProfile(name = null) {
+    if (name == null || name == undefined) {
+        const oidUser = getProfileId();
+
+        if (oidUser == null) return null;
+        return RouteKeyProfile(oidUser);
+    }
+
+    return `${RouteKeys.GoaRankStatus}-${name}`;
+}
 
 export async function profilePage() {
     const currentPath = `${window.location.pathname}${window.location.search}`;
-    const isSupportedProfilePage = SUPPORTED_PROFILE_PAGE_REGEX.test(currentPath);
-    if (!isSupportedProfilePage) return;
+    const mathUrl = getProfilePageType(currentPath);
 
+    if (!mathUrl) return;
+    const playerName = mathUrl[1];
+    const tipoPagina = playerName ? "PF" : "PFP";
+    if (!tipoPagina)
+        return;
+
+    const routeKeyProfile = tipoPagina === "PF" ? RouteKeyProfile(playerName) : RouteKeyProfile();
+    
     /**
      * @param {Object} data
      * @param {Object} data.data
@@ -21,9 +95,13 @@ export async function profilePage() {
      * @param {number} data.data.exp
      * @param {number} data.data.expNecessario
      */
-    const data = StorageService.get(RouteKeys.GoaRankStatus);
+    const data = StorageService.get(routeKeyProfile);
+    
+    if (!data)
+        return;
 
-    if (!data) return;
+    // só renderiza se for os dados do proprio boneco
+    if (tipoPagina === "PF" && data.data.nickname !== playerName) return;
 
     /**
      * @type {Translations}
@@ -41,9 +119,9 @@ export async function profilePage() {
     }
 
     // Aguardar até que o elemento de Experiência esteja presente na página.
-    await DOM.waitUntil(() => ExperienceCard.findCardElement(translations), 10000);
+    await DOM.waitUntil(() => ExperienceCard.findCardElementByName(translations, tipoPagina), 10000);
 
-    const cardElement = ExperienceCard.findCardElement(translations);
+    const cardElement = ExperienceCard.findCardElementByName(translations, tipoPagina);
     if (!cardElement) {
         return;
     }
@@ -55,12 +133,12 @@ export async function profilePage() {
     }
 
     const currentExperiencePoints = data.data.exp;
-    const nextExperiencePoints = data.data.expNecessario;
+    const nextExperiencePoints = data.data.expNecessario || currentExperiencePoints;
     const baseExperiencePoints = currentPatent.targetXp;
     const remainingExperiencePoints = Math.max(0, nextExperiencePoints - currentExperiencePoints);
 
-    const card = new ExperienceCard(translations);
-    
+    const card = new ExperienceCard(translations, tipoPagina);
+
     card.setBaseXp(baseExperiencePoints);
     card.setRemaining(remainingExperiencePoints);
     card.setNextXp(nextExperiencePoints);

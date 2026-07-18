@@ -4,6 +4,7 @@ declare global {
   type ProfileTranslations = {
     "xp-remaining-bg": string;
     "xp-label": string;
+    "xp-label-btn": string;
   };
 
   type Translations = {
