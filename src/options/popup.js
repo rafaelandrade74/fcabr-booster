@@ -35,6 +35,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const restrictedMessage = document.querySelector("[data-restricted]");
   const showNextPatentToggle = document.querySelector("#show-next-patent");
   const toggleLabel = document.querySelector("[data-switch-label]");
+  const showExperienceRankingToggle = document.querySelector("#show-experience-ranking");
+  const rankingToggleLabel = document.querySelector("[data-ranking-switch-label]");
+  const rankingIntervalSelect = document.querySelector("#ranking-interval");
   const saveButton = document.querySelector("#save-settings");
 
   const activeTabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -49,20 +52,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const storedSettings = await initializeStoredValues(DEFAULT_SETTINGS);
-  const isShowNextPatentEnabled = Boolean(storedSettings.showNextPatent);
 
-  renderToggleState(showNextPatentToggle, toggleLabel, isShowNextPatentEnabled);
+  renderToggleState(showNextPatentToggle, toggleLabel, Boolean(storedSettings.showNextPatent));
+  renderToggleState(showExperienceRankingToggle, rankingToggleLabel, Boolean(storedSettings.showExperienceRanking));
+
+  if (rankingIntervalSelect) {
+    rankingIntervalSelect.value = String(storedSettings.experienceRankingInterval);
+  }
 
   showNextPatentToggle?.addEventListener("change", (event) => {
-    const isEnabled = event.target.checked;
-    renderToggleState(showNextPatentToggle, toggleLabel, isEnabled);
+    renderToggleState(showNextPatentToggle, toggleLabel, event.target.checked);
+  });
+
+  showExperienceRankingToggle?.addEventListener("change", (event) => {
+    renderToggleState(showExperienceRankingToggle, rankingToggleLabel, event.target.checked);
   });
 
   saveButton?.addEventListener("click", async () => {
-    const isEnabled = showNextPatentToggle?.checked ?? false;
-
     await chrome.storage.local.set({
-      showNextPatent: isEnabled,
+      showNextPatent: showNextPatentToggle?.checked ?? false,
+      showExperienceRanking: showExperienceRankingToggle?.checked ?? false,
+      experienceRankingInterval: Number(rankingIntervalSelect?.value ?? 600000),
     });
 
     const activeTab = activeTabs[0];
