@@ -37,7 +37,8 @@
                 return;
             }
 
-            const players = body?.data?.players ?? body?.players ?? [];
+            // body.data é o array direto de jogadores
+            const players = Array.isArray(body?.data) ? body.data : [];
             const player = players.find(p => p.oidUser === oidUser);
 
             if (!player) return;
@@ -48,7 +49,7 @@
                 data: {
                     oidUser: player.oidUser,
                     rank: player.rank,
-                    ingameName: player.ingameName
+                    ingameName: player.inGameName
                 }
             });
         };
