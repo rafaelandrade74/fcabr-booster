@@ -15,13 +15,9 @@ script.onload = () => script.remove();
 initializeStoredValues(DEFAULT_SETTINGS).then(settings => {
     if (!settings.showExperienceRanking) return;
 
-    const config = document.createElement("script");
-    config.textContent = `window.__FCABR_RANKING_INTERVAL__ = ${Number(settings.experienceRankingInterval)};`;
-    (document.head || document.documentElement).appendChild(config);
-    config.remove();
-
     const rankingScript = document.createElement("script");
     rankingScript.src = chrome.runtime.getURL("scripts/content-scripts/ranking-monitor.js");
+    rankingScript.dataset.interval = Number(settings.experienceRankingInterval);
     rankingScript.onload = () => rankingScript.remove();
     (document.head || document.documentElement).appendChild(rankingScript);
 });
