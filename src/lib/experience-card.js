@@ -100,6 +100,18 @@ export default class ExperienceCard {
         }
     }
 
+    /**
+     * Escuta cliques no botão EXP e dispara callback após o FCABR atualizar o DOM.
+     * Idempotente: registra o listener apenas uma vez por elemento.
+     * @param {() => void} callback
+     */
+    watchTabSwitch(callback) {
+        const btn = this.card?.querySelector("div.inline-flex.rounded.border > button");
+        if (!btn || btn.hasAttribute("data-fcabr-tab-watch")) return;
+        btn.setAttribute("data-fcabr-tab-watch", "");
+        btn.addEventListener("click", () => setTimeout(callback, 0));
+    }
+
     /** @returns {HTMLElement | null} */
     getHeader() {
         const tabEl = this.card?.querySelector("div.inline-flex.rounded.border");

@@ -150,4 +150,6 @@ export async function profilePage() {
             card.setRankingBadge(rankData.rank);
         }
     }
+
+    card.watchTabSwitch(profilePage);
 }
