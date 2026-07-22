@@ -1,5 +1,5 @@
 import { initializeStoredValues } from "../utils";
-import { DEFAULT_SETTINGS } from "../utils/settings";
+import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS } from "../utils/settings";
 
 function isAllowedHost(url) {
   if (!url) {
@@ -57,7 +57,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderToggleState(showExperienceRankingToggle, rankingToggleLabel, Boolean(storedSettings.showExperienceRanking));
 
   if (rankingIntervalSelect) {
-    rankingIntervalSelect.value = String(storedSettings.experienceRankingInterval);
+    const safeInterval = Math.max(MIN_RANKING_INTERVAL_MS, Number(storedSettings.experienceRankingInterval));
+    rankingIntervalSelect.value = String(safeInterval);
+    if (rankingIntervalSelect.value !== String(safeInterval)) {
+      rankingIntervalSelect.value = String(MIN_RANKING_INTERVAL_MS);
+    }
   }
 
   showNextPatentToggle?.addEventListener("change", (event) => {

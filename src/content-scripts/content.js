@@ -3,7 +3,7 @@ import { profilePage } from "./routes/profile.js";
 import StorageService from "../lib/storage-service.js";
 import { RouteKeys } from "../data/routekeys.js";
 import { initializeStoredValues } from "../utils/index.js";
-import { DEFAULT_SETTINGS } from "../utils/settings.js";
+import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS } from "../utils/settings.js";
 
 const script = document.createElement("script");
 
@@ -17,7 +17,7 @@ initializeStoredValues(DEFAULT_SETTINGS).then(settings => {
 
     const rankingScript = document.createElement("script");
     rankingScript.src = chrome.runtime.getURL("scripts/content-scripts/ranking-monitor.js");
-    rankingScript.dataset.interval = Number(settings.experienceRankingInterval);
+    rankingScript.dataset.interval = Math.max(MIN_RANKING_INTERVAL_MS, Number(settings.experienceRankingInterval));
     rankingScript.onload = () => rankingScript.remove();
     (document.head || document.documentElement).appendChild(rankingScript);
 });

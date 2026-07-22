@@ -2,8 +2,9 @@
 
     const RANKING_API_URL = "https://fcabr.net/api/ranking/player?tab=experience&page=1&pageSize=1000&search=d&hideBannedUsers=0";
     const SYNTHETIC_URL = "fcabr://ranking/experience-position";
+    const MIN_INTERVAL_MS = 60000;
     // document.currentScript só está disponível durante a execução síncrona do script
-    const intervalMs = Number(document.currentScript?.dataset?.interval) || 600000;
+    const intervalMs = Math.max(MIN_INTERVAL_MS, Number(document.currentScript?.dataset?.interval) || MIN_INTERVAL_MS);
 
     function getCurrentUserId() {
         const profileKey = Object.keys(localStorage)
