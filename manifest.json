@@ -1,4 +1,4 @@
-{
+﻿{
   "manifest_version": 3,
   "name": "FCABR Booster",
   "version": "0.1.2",
@@ -22,7 +22,7 @@
     }
   ],"web_accessible_resources": [
     {
-      "resources": ["scripts/content-scripts/inject.js"],
+      "resources": ["scripts/content-scripts/inject.js", "scripts/content-scripts/ranking-monitor.js"],
       "matches": ["https://fcabr.net/*"]
     }
   ],

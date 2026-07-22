@@ -38,6 +38,44 @@
             </label>
           </div>
 
+        </section>
+
+        <section class="panel" aria-labelledby="ranking-title">
+          <div class="panel-header">
+            <h2 id="ranking-title">Ranking de experiência</h2>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <p class="setting-title">Visualizar posição no ranking de experiência no perfil</p>
+              <p class="setting-help">Ative para consultar e exibir sua posição no ranking de experiência.</p>
+            </div>
+
+            <label class="switch" for="show-experience-ranking">
+              <input id="show-experience-ranking" type="checkbox" />
+              <span class="switch-track" aria-hidden="true">
+                <span class="switch-thumb"></span>
+              </span>
+              <span class="switch-label" data-ranking-switch-label>Ativado</span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <p class="setting-title">Intervalo de atualização</p>
+              <p class="setting-help">Com qual frequência verificar o ranking.</p>
+            </div>
+
+            <select id="ranking-interval" class="select" aria-label="Intervalo de atualização do ranking">
+              <option value="60000">1 min</option>
+              <option value="300000">5 min</option>
+              <option value="600000">10 min</option>
+              <option value="900000">15 min</option>
+              <option value="1200000">20 min</option>
+              <option value="1800000">30 min</option>
+            </select>
+          </div>
+
           <button id="save-settings" class="save-button" type="button">Salvar e atualizar</button>
         </section>
       </section>
