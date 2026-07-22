@@ -57,10 +57,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderToggleState(showExperienceRankingToggle, rankingToggleLabel, Boolean(storedSettings.showExperienceRanking));
 
   if (rankingIntervalSelect) {
-    const safeInterval = Math.max(MIN_RANKING_INTERVAL_MS, Number(storedSettings.experienceRankingInterval));
+    const storedInterval = Number(storedSettings.experienceRankingInterval);
+    const safeInterval = Math.max(MIN_RANKING_INTERVAL_MS, storedInterval);
     rankingIntervalSelect.value = String(safeInterval);
     if (rankingIntervalSelect.value !== String(safeInterval)) {
       rankingIntervalSelect.value = String(MIN_RANKING_INTERVAL_MS);
+    }
+    if (safeInterval !== storedInterval) {
+      await chrome.storage.local.set({ experienceRankingInterval: safeInterval });
     }
   }
 
