@@ -101,6 +101,60 @@ export default class ExperienceCard {
     }
 
     /** @returns {HTMLElement | null} */
+    getHeader() {
+        const tabEl = this.card?.querySelector("div.inline-flex.rounded.border");
+        return tabEl?.parentElement || null;
+    }
+
+    /**
+     * Injeta ou atualiza o badge "Top #N" no header do card.
+     * Idempotente: chamadas subsequentes apenas atualizam o número.
+     * @param {number} rank
+     */
+    setRankingBadge(rank) {
+        if (!rank) return;
+        const header = this.getHeader();
+        if (!header) return;
+
+        const ATTR = "data-fcabr-rank-badge";
+        let badge = header.querySelector(`[${ATTR}]`);
+
+        if (badge) {
+            const numEl = badge.querySelector("[data-fcabr-rank-num]");
+            if (numEl) numEl.textContent = `Top #${rank}`;
+            return;
+        }
+
+        badge = document.createElement("div");
+        badge.setAttribute(ATTR, "");
+        badge.style.cssText = [
+            "display:inline-flex",
+            "align-items:center",
+            "gap:5px",
+            "background:rgba(240,180,41,.1)",
+            "border:1px solid rgba(240,180,41,.3)",
+            "border-radius:5px",
+            "padding:3px 9px",
+            "font-size:11px",
+            "font-weight:700",
+            "color:#f0b429",
+            "white-space:nowrap",
+            "flex-shrink:0",
+            "line-height:1.4",
+            "margin-left:auto",
+        ].join(";");
+
+        badge.appendChild(createTrophyIcon());
+
+        const num = document.createElement("span");
+        num.setAttribute("data-fcabr-rank-num", "");
+        num.textContent = `Top #${rank}`;
+        badge.appendChild(num);
+
+        header.appendChild(badge);
+    }
+
+    /** @returns {HTMLElement | null} */
     get progressBar() {
         return /** @type {HTMLElement | null} */ (this.card?.querySelector(".bg-gradient-to-r") || null);
     }
@@ -120,6 +174,36 @@ export default class ExperienceCard {
 
         this.progressBar.style.width = `${percent}%`;
     }
+}
+
+/** @returns {SVGSVGElement} */
+function createTrophyIcon() {
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("width", "11");
+    svg.setAttribute("height", "11");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2.5");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.style.flexShrink = "0";
+
+    [
+        "M6 9H4.5a2.5 2.5 0 0 1 0-5H6",
+        "M18 9h1.5a2.5 2.5 0 0 0 0-5H18",
+        "M4 22h16",
+        "M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22",
+        "M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22",
+        "M18 2H6v7a6 6 0 0 0 12 0V2Z",
+    ].forEach(d => {
+        const path = document.createElementNS(NS, "path");
+        path.setAttribute("d", d);
+        svg.appendChild(path);
+    });
+
+    return svg;
 }
 
 /**

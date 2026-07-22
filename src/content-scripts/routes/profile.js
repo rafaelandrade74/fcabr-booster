@@ -143,4 +143,11 @@ export async function profilePage() {
     card.setRemaining(remainingExperiencePoints);
     card.setNextXp(nextExperiencePoints);
     card.setProgress(currentExperiencePoints, baseExperiencePoints, nextExperiencePoints);
+
+    if (tipoPagina === "PFP") {
+        const rankData = StorageService.get(`${RouteKeys.ExperienceRankingPosition}-${data.data.oidUser}`);
+        if (rankData?.rank) {
+            card.setRankingBadge(rankData.rank);
+        }
+    }
 }
