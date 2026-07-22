@@ -1,3 +1,5 @@
 export const DEFAULT_SETTINGS = {
-  showNextPatent: true
+  showNextPatent: true,
+  showExperienceRanking: false,
+  experienceRankingInterval: 600000
 };
