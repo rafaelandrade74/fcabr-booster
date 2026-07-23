@@ -7,13 +7,18 @@ sequenceDiagram
     participant Browser as Navegador
     participant Content as content.js
     participant Inject as inject.js
+    participant Monitor as monitor-manager.js
     participant Page as fcabr.net
 
     Browser->>Content: Carrega content script (document_start)
     Content->>Page: Cria <script src="inject.js"> e insere no <head>
     Page->>Inject: Executa inject.js no Main World
     Inject->>Page: Monkey-patch window.fetch
-    Inject-->>Content: (script remove a si mesmo do DOM)
+    Content->>Page: Cria <script src="monitor-manager.js"> (se features ativas)
+    Page->>Monitor: Executa monitor-manager.js no Main World
+    Monitor->>Monitor: Inicia ExperienceRankingMonitor e/ou FireteamRankingMonitor
+    Monitor->>Monitor: Inicia polling de 1s para detectar troca de perfil
+    Content->>Content: Intercepta localStorage.setItem
     Content->>Content: Registra listener "message"
     Content->>Content: Aguarda DOMContentLoaded
     Content->>Content: Monkey-patch history.pushState/replaceState
@@ -23,7 +28,7 @@ sequenceDiagram
 
 ---
 
-## 2. Fluxo de Interceptação de API
+## 2. Fluxo de Interceptação de API (fetch)
 
 ```mermaid
 sequenceDiagram
@@ -36,128 +41,147 @@ sequenceDiagram
     Page->>Inject: fetch("/api/goa-rank-status?oidUser=123")
     Inject->>Page: Chama fetch original
     Page-->>Inject: Response
-    Inject->>Inject: Clona response
-    Inject->>Inject: clone.json()
+    Inject->>Inject: Clona response e parseia JSON
     Inject->>Content: postMessage({source:"FCABR_EXTENSION", url, data})
-    Content->>Content: Verifica event.source === window
-    Content->>Content: Encontra apiRoute que bate com url via regex
+    Content->>Content: Encontra apiRoute via regex
     Content->>Profile: storageKeyGoaRankStatus(data)
-    Profile->>Profile: Resolve chave ("goa-rank-status-{id|nickname}")
-    Profile-->>Content: storageKey
-    Content->>Storage: StorageService.set(storageKey, data)
+    Profile-->>Content: [keyByOidUser, keyByNickname]
+    Content->>Storage: StorageService.set(keyByOidUser, data)
+    Content->>Storage: StorageService.set(keyByNickname, data)
     Content->>Content: renderPage()
 ```
 
 ---
 
-## 3. Fluxo de Renderização da Página de Perfil
+## 3. Fluxo dos Monitores Periódicos
 
 ```mermaid
-flowchart TD
-    A[renderPage chamado] --> B{URL bate com regex\n/[lang]/profile...?}
-    B -->|Não| Z[Retorna sem fazer nada]
-    B -->|Sim| C[Chama profilePage]
+sequenceDiagram
+    participant Monitor as monitor-manager.js
+    participant API as fcabr.net/api
+    participant Content as content.js
+    participant Storage as StorageService
 
-    C --> D{getProfilePageType\nretorna match?}
-    D -->|Não| Z
-    D -->|Sim| E{Tem playerName\nna URL?}
+    Monitor->>Monitor: setInterval(execute, 600s)
+    Monitor->>Monitor: getCurrentUserId() → oidUser
 
-    E -->|Sim - /pt/profile/jogador| F["tipoPagina = 'PF'"]
-    E -->|Não - /pt/profile| G["tipoPagina = 'PFP'"]
+    alt ExperienceRankingMonitor
+        Monitor->>API: XHR GET /ranking/player?tab=experience&pageSize=1000
+        API-->>Monitor: Lista de jogadores com ranks
+        Monitor->>Monitor: Encontra jogador por oidUser
+        Monitor->>Content: postMessage({url:"fcabr://ranking/experience-position", data})
+    end
 
-    F --> H[RouteKeyProfile com playerName]
-    G --> I[RouteKeyProfile com ID do localStorage]
+    alt FireteamRankingMonitor
+        Monitor->>API: XHR GET /profile?userId={oidUser}
+        API-->>Monitor: {oidGuild}
+        Monitor->>API: XHR GET /ranking/clan/fireteam?...
+        API-->>Monitor: {rank, pointTotal, currentWeekID}
+        Monitor->>Content: postMessage({url:"fcabr://ranking/fireteam/clan", data})
+        Monitor->>API: XHR GET /ranking/clan/fireteam/{oidGuild}/players?weekId=...
+        API-->>Monitor: Lista de jogadores do clã
+        Monitor->>Content: postMessage({url:"fcabr://ranking/fireteam/clan/player", data})
+    end
 
-    H --> J[StorageService.get routeKey]
-    I --> J
-
-    J --> K{data existe\nno cache?}
-    K -->|Não| Z
-    K -->|Sim| L{tipoPagina=PF?\nnickname bate?}
-    L -->|Não bate| Z
-    L -->|Sim| M[getTranslations]
-
-    M --> N[initializeStoredValues]
-    N --> O{showNextPatent\n= true?}
-    O -->|false| Z
-    O -->|true| P[DOM.waitUntil\ncartão de XP aparecer]
-
-    P --> Q{Cartão\nencontrado?}
-    Q -->|Timeout| Z
-    Q -->|Sim| R[ExperienceCard.findCardElementByName]
-
-    R --> S[Encontra patente\nna tabela patents.js]
-    S --> T{Patente\nencontrada?}
-    T -->|Não| Z
-    T -->|Sim| U[Calcula XP]
-
-    U --> V["baseXp = patent.targetXp\nnextXp = data.expNecessario\nremaining = nextXp - currentXp"]
-    V --> W[new ExperienceCard]
-    W --> X[card.setBaseXp]
-    X --> Y[card.setRemaining]
-    Y --> AA[card.setNextXp]
-    AA --> AB[card.setProgress]
-    AB --> AC[DOM atualizado ✓]
+    Content->>Storage: StorageService.set(key, data)
+    Content->>Content: renderPage()
 ```
 
 ---
 
-## 4. Fluxo de Navegação SPA (Single Page Application)
+## 4. Fluxo de Troca de Perfil
 
-O site FCABR usa navegação SPA. A extensão detecta mudanças de URL por múltiplos mecanismos:
+```mermaid
+sequenceDiagram
+    participant User as Usuário
+    participant Page as fcabr.net
+    participant LS as localStorage
+    participant Content as content.js
+    participant Monitor as monitor-manager.js
+
+    User->>Page: Seleciona outro perfil
+    Page->>LS: setItem("selected-profile-X", newOidUser)
+    LS-->>Content: (interceptado por override de setItem)
+    Content->>Content: renderPage() com novo oidUser
+
+    Monitor->>Monitor: setInterval tick (1s)
+    Monitor->>LS: getCurrentUserId()
+    LS-->>Monitor: newOidUser ≠ lastProfileId
+    Monitor->>Monitor: lastProfileId = newOidUser
+    Monitor->>Monitor: manager.refresh() → execute() em todos os monitores
+    Monitor->>Page: XHR com novo oidUser
+    Page-->>Monitor: Novos dados de ranking
+    Monitor->>Content: postMessage com novos dados
+    Content->>Content: renderPage() → exibe dados do novo perfil
+```
+
+---
+
+## 5. Fluxo de Renderização da Página de Perfil
+
+```mermaid
+flowchart TD
+    A[renderPage chamado] --> B{URL bate com regex\n/lang/profile...?}
+    B -->|Não| Z[Retorna]
+    B -->|Sim| C[profilePage]
+
+    C --> D{getProfilePageType?}
+    D -->|Não| Z
+    D -->|Sim| E{playerName na URL?}
+
+    E -->|Sim| F["PF — perfil de terceiro"]
+    E -->|Não| G["PFP — perfil próprio"]
+
+    F --> H[RouteKeyProfile com nickname]
+    G --> I[RouteKeyProfile com oidUser do localStorage]
+
+    H --> J[StorageService.get routeKey]
+    I --> J
+
+    J --> K{data no cache?}
+    K -->|Não| Z
+    K -->|Sim| L[getTranslations + initializeStoredValues]
+
+    L --> M{shouldShowNextPatent\nou shouldShowAnyFireteam?}
+    M -->|Não| Z
+    M -->|Sim| N[DOM.waitUntil — aguarda cartão de XP]
+
+    N --> O{showNextPatent?}
+    O -->|Sim| P[Calcula XP e atualiza cartão]
+    P --> Q{isOwnProfile\n+ showExperienceRanking?}
+    Q -->|rank encontrado| R[badge Top #N]
+    Q -->|sem rank| S[badge Top +1000]
+    Q -->|feature off| T[sem badge]
+
+    O --> U{shouldShowAnyFireteam?}
+    U -->|Sim| V[FireteamCard.render com clanData e playerData]
+    V --> W[Campos com dados reais ou zero]
+
+    N --> X[Ajusta altura card 'Em breve']
+    N --> Y[watchTabSwitch]
+```
+
+---
+
+## 6. Fluxo de Navegação SPA
 
 ```mermaid
 flowchart TD
     A[Usuário navega no site] --> B{Como a URL mudou?}
 
-    B -->|history.pushState| C[Interceptado pelo patch\nem content.js]
-    B -->|history.replaceState| D[Interceptado pelo patch\nem content.js]
+    B -->|history.pushState| C[Interceptado pelo patch em content.js]
+    B -->|history.replaceState| D[Interceptado pelo patch em content.js]
     B -->|Botão voltar/avançar| E[Evento popstate]
-    B -->|Outros métodos| F[Polling a cada 200ms\ndetecta mudança]
+    B -->|Outros métodos| F[Polling a cada 200ms detecta mudança]
 
     C --> G[checkUrlChange]
     D --> G
     E --> G
     F --> G
 
-    G --> H{location.href\nmudou?}
+    G --> H{location.href mudou?}
     H -->|Não| I[Ignora]
-    H -->|Sim| J[Atualiza lastUrl]
-    J --> K[renderPage]
-```
-
----
-
-## 5. Fluxo de Detecção de Responsividade
-
-```mermaid
-flowchart LR
-    A[window resize] --> B{innerWidth\n≤ 1023?}
-    B -->|Mudou estado mobile| C[Atualiza isMobile]
-    C --> D[renderPage]
-    B -->|Mesmo estado| E[Ignora]
-```
-
----
-
-## 6. Fluxo de Resolução de Idioma
-
-```mermaid
-flowchart TD
-    A[getTranslations chamado\ncom pathname e documentLang] --> B[resolveSelectedLanguage]
-    B --> C[getLanguageFromValue pathname\nex: /pt/profile → 'pt']
-    C --> D{Match\nencontrado?}
-    D -->|Sim| E[Usa idioma da URL]
-    D -->|Não| F[getLanguageFromValue documentLang]
-    F --> G{Match\nencontrado?}
-    G -->|Sim| H[Usa idioma do documento]
-    G -->|Não| I[Fallback: 'pt']
-    E --> J[getTranslationsByLanguage]
-    H --> J
-    I --> J
-    J --> K{translations[lang]\nexiste?}
-    K -->|Sim| L[Retorna traduções do idioma]
-    K -->|Não| M[Fallback: translations.pt]
+    H -->|Sim| J[Atualiza lastUrl → renderPage]
 ```
 
 ---
@@ -179,14 +203,11 @@ sequenceDiagram
         Popup->>User: Exibe "Uso restrito"
     else URL é fcabr.net
         Popup->>ChromeStorage: get(null)
-        ChromeStorage-->>Popup: {showNextPatent: true/false}
-        Popup->>User: Exibe toggle com estado atual
+        ChromeStorage-->>Popup: settings atuais
+        Popup->>User: Exibe seções com toggles no estado atual
 
-        User->>Popup: Clica no toggle
-        Popup->>User: Atualiza label (Ativado/Desativado)
-
-        User->>Popup: Clica "Salvar e atualizar"
-        Popup->>ChromeStorage: set({showNextPatent: isEnabled})
+        User->>Popup: Altera toggles
+        Popup->>ChromeStorage: set(novasSettings) — auto-save
         Popup->>ChromeTabs: reload(tab.id)
         Popup->>Popup: window.close()
     end
@@ -197,24 +218,23 @@ sequenceDiagram
 ## 8. Fluxo de Cálculo do Cartão de XP
 
 ```
-Dados da API:
-  patenteAtual: "GOA Gold"
-  exp: 50_000_000
-  expNecessario: 80_000_000
+Dados da API (goa-rank-status):
+  patenteAtual: "1º MAJOR"
+  exp: 1.459.900
+  expNecessario: 1.533.000
 
 Tabela patents.js:
-  { name: "GOA Gold",    targetXp: 44_000_000 }
-  { name: "GOA Diamond", targetXp: 80_000_000 }
+  { name: "1º MAJOR", targetXp: 1.400.000 }
 
 Cálculo:
-  baseXp    = 44_000_000  (targetXp da patente atual)
-  nextXp    = 80_000_000  (expNecessario da API)
-  remaining = max(0, 80_000_000 - 50_000_000) = 30_000_000
-  progress  = ((50M - 44M) / (80M - 44M)) * 100 = 16.67%
+  baseXp    = 1.400.000  (targetXp da patente atual)
+  nextXp    = 1.533.000  (expNecessario da API)
+  remaining = max(0, 1.533.000 - 1.459.900) = 73.100
+  progress  = ((1.459.900 - 1.400.000) / (1.533.000 - 1.400.000)) * 100 ≈ 45%
 
 Atualização do DOM:
-  spans[0].textContent = "44.000.000"     (base XP)
-  spans[1].textContent = "30.000.000 XP restante"
-  spans[2].textContent = "80.000.000"     (próximo XP)
-  progressBar.style.width = "16.67%"
+  spans[0].nodeValue = "1.400.000"            (base XP)
+  spans[1].nodeValue = "73.100 XP restante"
+  spans[2].nodeValue = "1.533.000"            (próximo XP)
+  progressBar.style.width = "45%"
 ```

@@ -14,6 +14,7 @@ O projeto não tem dependências de runtime (`dependencies` no `package.json`). 
 | `webpack-cli` | ^6.0.1 | Interface de linha de comando do webpack |
 | `html-webpack-plugin` | ^5.6.0 | Gera o `popup.html` no dist a partir do template |
 | `copy-webpack-plugin` | ^12.0.2 | Copia `public/` e `manifest.json` para `dist/` sem processamento |
+| `archiver` | ^6.0.2 | Gera o zip de release (`npm run release`) |
 
 ---
 
@@ -24,7 +25,7 @@ O projeto não tem dependências de runtime (`dependencies` no `package.json`). 
 | Manifest V3 | 3 | Especificação de extensão de navegador (Chrome + Firefox) |
 | JavaScript | ES2020 | Linguagem principal |
 | TypeScript (apenas tipos) | — | Arquivo `translations.d.ts` com tipos globais, sem compilação TS |
-| Node.js | — | Ambiente de build (não vai para produção) |
+| Node.js | 18+ | Ambiente de build (não vai para produção) |
 
 ---
 
@@ -33,14 +34,15 @@ O projeto não tem dependências de runtime (`dependencies` no `package.json`). 
 | API | Contexto | Permissão necessária |
 |---|---|---|
 | `chrome.storage.local` | popup.js, utils/ | `"storage"` |
-| `chrome.storage.session` | Não usado (sugerido) | `"storage"` |
 | `chrome.tabs.query` | popup.js | `"tabs"` |
 | `chrome.tabs.reload` | popup.js | `"tabs"` |
 | `chrome.runtime.getURL` | content.js | Automático |
 | `window.fetch` (override) | inject.js | Nenhuma |
-| `window.postMessage` | inject.js → content.js | Nenhuma |
+| `XMLHttpRequest` | monitor-manager.js | Nenhuma |
+| `window.postMessage` | inject.js, monitor-manager.js → content.js | Nenhuma |
 | `MutationObserver` | dom.js | Nenhuma |
-| `localStorage` (leitura) | routes/profile.js | Nenhuma |
+| `localStorage` (leitura e polling) | routes/profile.js, monitor-manager.js | Nenhuma |
+| `localStorage.setItem` (override) | content.js | Nenhuma |
 | `history.pushState/replaceState` (override) | content.js | Nenhuma |
 
 ---
@@ -53,41 +55,38 @@ graph TD
         E1["src/options/popup.js"]
         E2["src/content-scripts/content.js"]
         E3["src/content-scripts/inject.js"]
+        E4["src/content-scripts/monitor-manager.js"]
     end
 
-    subgraph "Outputs"
-        O1["dist/scripts/popup.js"]
-        O2["dist/scripts/content-scripts/content.js"]
-        O3["dist/scripts/content-scripts/inject.js"]
-        O4["dist/popup.html"]
-        O5["dist/manifest.json"]
-        O6["dist/images/"]
-        O7["dist/styles/"]
+    subgraph "Outputs dist/"
+        O1["scripts/popup.js"]
+        O2["scripts/content-scripts/content.js"]
+        O3["scripts/content-scripts/inject.js"]
+        O4["scripts/content-scripts/monitor-manager.js"]
+        O5["popup.html"]
+        O6["manifest.json"]
+        O7["images/"]
+        O8["styles/"]
+    end
+
+    subgraph "Release"
+        Z["release-v{version}.zip"]
     end
 
     E1 -->|webpack bundle| O1
     E2 -->|webpack bundle| O2
     E3 -->|webpack bundle| O3
-    HWP["html-webpack-plugin\n(src/options/popup.html)"] --> O4
-    CWP["copy-webpack-plugin\n(public/ + manifest.json)"] --> O5
-    CWP --> O6
+    E4 -->|webpack bundle| O4
+    HWP["html-webpack-plugin"] --> O5
+    CWP["copy-webpack-plugin"] --> O6
     CWP --> O7
+    CWP --> O8
+    O1 & O2 & O3 & O4 & O5 & O6 & O7 & O8 -->|scripts/release.js| Z
 ```
 
 ---
 
 ## Compatibilidade de Navegadores
-
-Declarada no `manifest.json`:
-
-```json
-"browser_specific_settings": {
-  "gecko": {
-    "id": "contato@ferasgameshosting.com.br",
-    "strict_min_version": "109.0"
-  }
-}
-```
 
 | Navegador | Suporte | Observação |
 |---|---|---|

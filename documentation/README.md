@@ -1,6 +1,6 @@
 # FCABR Booster — Documentação Técnica
 
-> Extensão de navegador (Manifest V3) que enriquece a experiência do usuário no site **fcabr.net**, exibindo informações precisas de progressão de patente no cartão de XP do perfil.
+> Extensão de navegador (Manifest V3) que enriquece a experiência do usuário no site **fcabr.net**, exibindo informações de progressão de patente, ranking de experiência e ranking Fireteam nas páginas de perfil dos jogadores.
 
 ---
 
@@ -32,23 +32,24 @@
 
 ### O que é
 
-**FCABR Booster** é uma extensão de navegador para Chrome e Firefox que atua exclusivamente no domínio `https://fcabr.net`. Seu propósito é corrigir e enriquecer as informações exibidas no cartão de experiência (XP) das páginas de perfil dos jogadores.
+**FCABR Booster** é uma extensão de navegador para Chrome e Firefox que atua exclusivamente no domínio `https://fcabr.net`. Seu propósito é enriquecer as informações exibidas nos perfis dos jogadores com dados de progressão de patente, posição no ranking de experiência e ranking Fireteam.
 
 ### Problema que resolve
 
-A plataforma FCABR exibe no perfil do jogador informações de progressão de patente (XP base, XP necessário para a próxima patente, barra de progresso), mas esses valores podem ser exibidos incorretamente ou de forma incompleta pelo site original. A extensão intercepta os dados brutos da API, calcula os valores corretos com base em sua própria tabela de patentes e atualiza os elementos visuais da página.
+A plataforma FCABR exibe informações de progressão de patente (XP base, XP necessário, barra de progresso) que podem ser exibidas de forma incompleta. Além disso, dados de ranking como posição no ranking geral e no ranking Fireteam do clã não são exibidos diretamente no perfil. A extensão intercepta e complementa essas informações.
 
 ### Usuário-alvo
 
-Jogadores da plataforma FCABR que desejam ver suas informações de progressão de patente de forma precisa e completa.
+Jogadores da plataforma FCABR que desejam ver informações completas de progressão, ranking de experiência e desempenho no Fireteam diretamente no perfil.
 
 ### Fluxo principal
 
 1. Usuário instala a extensão e navega para `fcabr.net`.
-2. A extensão injeta um script que monitora as chamadas fetch da página.
-3. Quando a API de ranking é chamada, os dados são capturados.
-4. A extensão aguarda o DOM carregar o cartão de XP.
-5. O cartão é atualizado com os valores corretos de XP e a barra de progresso calculada.
+2. A extensão injeta `inject.js` que intercepta as chamadas `fetch` da página.
+3. Quando a API de perfil (`goa-rank-status`) é chamada, os dados são capturados e armazenados.
+4. Periodicamente, `monitor-manager.js` busca dados de ranking de experiência e Fireteam.
+5. A extensão aguarda o DOM carregar o cartão de XP e injeta os componentes visuais.
+6. Ao trocar de perfil, os monitores são re-executados automaticamente.
 
 ---
 
@@ -56,7 +57,8 @@ Jogadores da plataforma FCABR que desejam ver suas informações de progressão 
 
 - **Linguagem:** JavaScript (ES2020), TypeScript apenas para tipos (`.d.ts`)
 - **Build:** Webpack 5
+- **Release:** `npm run release` → build + zip `release-v{version}.zip`
 - **Plataforma:** Browser Extension — Manifest V3 (Chrome + Firefox)
 - **Armazenamento:** `chrome.storage.local` (settings) + `Map` em memória (dados de sessão)
-- **APIs externas:** `https://fcabr.net/api/goa-rank-status`
+- **APIs externas:** `fcabr.net/api/goa-rank-status`, `fcabr.net/api/ranking/player`, `fcabr.net/api/ranking/clan/fireteam`
 - **Sem frameworks de UI:** DOM puro
