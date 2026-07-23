@@ -1,6 +1,6 @@
 (() => {
 
-    const RANKING_API_URL = "https://fcabr.net/api/ranking/player?tab=experience&page=1&pageSize=1000&search=d&hideBannedUsers=0";
+    const RANKING_API_URL = "https://fcabr.net/api/ranking/player?tab=experience&page=1&pageSize=1000&hideBannedUsers=0";
     const SYNTHETIC_URL = "fcabr://ranking/experience-position";
     const MIN_INTERVAL_MS = 60000;
     // document.currentScript só está disponível durante a execução síncrona do script
@@ -42,7 +42,6 @@
             // body.data é o array direto de jogadores
             const players = Array.isArray(body?.data) ? body.data : [];
             const player = players.find(p => p.oidUser === oidUser);
-
             if (!player) return;
 
             window.postMessage({
