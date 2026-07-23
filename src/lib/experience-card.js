@@ -151,10 +151,12 @@ export default class ExperienceCard {
             ].join(";");
 
             const nameEl = outerCard?.querySelector('[class*="text-4xl"]') ?? null;
-            // flexRow = div.flex.items-center.gap-3 (patente + nome + badge)
-            const flexRow = nameEl?.parentElement?.parentElement ?? null;
-            if (flexRow) {
-                flexRow.appendChild(container);
+            // outerRow = div.flex.flex-wrap.justify-between (linha topo do card)
+            const outerRow = nameEl?.parentElement?.parentElement?.parentElement ?? null;
+            // rightCol = coluna da direita (ícones sociais) — último filho do outerRow
+            const rightCol = outerRow?.lastElementChild ?? null;
+            if (rightCol) {
+                rightCol.prepend(container);
             } else {
                 this.card.appendChild(container);
             }
