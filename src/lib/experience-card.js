@@ -135,8 +135,10 @@ export default class ExperienceCard {
     _getBadgeContainer() {
         if (!this.card) return null;
 
+        // O nome do player está no card externo (parentElement), não no card interno de XP
+        const outerCard = this.card.parentElement;
         const ATTR = "data-fcabr-badge-container";
-        let container = this.card.querySelector(`[${ATTR}]`);
+        let container = outerCard?.querySelector(`[${ATTR}]`) ?? this.card.querySelector(`[${ATTR}]`);
 
         if (!container) {
             container = document.createElement("div");
@@ -148,10 +150,12 @@ export default class ExperienceCard {
                 "margin-top:4px",
             ].join(";");
 
-            // Insere após o div do nome do player (text-4xl)
-            const nameEl = this.card.querySelector('[class*="text-4xl"]');
-            if (nameEl) {
-                nameEl.insertAdjacentElement("afterend", container);
+            const nameEl = outerCard?.querySelector('[class*="text-4xl"]') ?? null;
+            if (nameEl?.parentElement) {
+                // Coloca o badge inline com o nome tornando o wrapper flex
+                const nameWrapper = nameEl.parentElement;
+                nameWrapper.style.cssText = "display:flex;align-items:center;gap:8px;flex-wrap:wrap";
+                nameWrapper.appendChild(container);
             } else {
                 this.card.appendChild(container);
             }
