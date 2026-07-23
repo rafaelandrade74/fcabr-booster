@@ -42,7 +42,6 @@
             // body.data é o array direto de jogadores
             const players = Array.isArray(body?.data) ? body.data : [];
             const player = players.find(p => p.oidUser === oidUser);
-            console.log(player, oidUser, body?.data);
             if (!player) return;
 
             window.postMessage({

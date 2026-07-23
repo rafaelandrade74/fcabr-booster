@@ -60,10 +60,7 @@ export default class ExperienceCard {
      * @param {number} xp
      */
     setBaseXp(xp) {
-        if (xp === undefined || xp === null) {
-            console.warn("Base XP is undefined or null");
-            return;
-        }
+        if (xp === undefined || xp === null) return;
 
         const spans = this.getFooterSpans();
         if (spans[0]) {
@@ -76,10 +73,7 @@ export default class ExperienceCard {
      */
     setRemaining(xp) {
         if (xp === 0) return;
-        if (xp === undefined || xp === null) {
-            console.warn("Remaining XP is undefined or null");
-            return;
-        }
+        if (xp === undefined || xp === null) return;
         const remainingLabel = this.translations?.Profile?.["xp-remaining-bg"] || "XP restante";
 
         const spans = this.getFooterSpans();
@@ -90,10 +84,7 @@ export default class ExperienceCard {
      * @param {number} xp
      */
     setNextXp(xp) {
-        if (xp === undefined || xp === null) {
-            console.warn("Next XP is undefined or null");
-            return;
-        }
+        if (xp === undefined || xp === null) return;
         const spans = this.getFooterSpans();
         if (spans[2]) {
             spans[2].textContent = formatXP(xp, this.translations.lang);
