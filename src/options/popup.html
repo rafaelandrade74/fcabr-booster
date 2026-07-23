@@ -60,21 +60,6 @@
             </label>
           </div>
 
-          <div class="setting-row">
-            <div class="setting-copy">
-              <p class="setting-title">Intervalo de atualização</p>
-              <p class="setting-help">Com qual frequência verificar o ranking.</p>
-            </div>
-
-            <select id="ranking-interval" class="select" aria-label="Intervalo de atualização do ranking">
-              <option value="60000">1 min</option>
-              <option value="300000">5 min</option>
-              <option value="600000">10 min</option>
-              <option value="900000">15 min</option>
-              <option value="1200000">20 min</option>
-              <option value="1800000">30 min</option>
-            </select>
-          </div>
         </section>
 
         <section class="panel" aria-labelledby="fireteam-ranking-title">
@@ -84,26 +69,74 @@
 
           <div class="setting-row">
             <div class="setting-copy">
-              <p class="setting-title">Visualizar posição no Ranking Semanal Fireteam</p>
-              <p class="setting-help">Ative para consultar e exibir sua posição e a do seu clã no ranking semanal de fireteam.</p>
+              <p class="setting-title">Mostrar posição do Clã no Ranking Fireteam</p>
+              <p class="setting-help">Exibe a posição do seu clã no ranking semanal de fireteam.</p>
             </div>
 
-            <label class="switch" for="show-fireteam-ranking">
-              <input id="show-fireteam-ranking" type="checkbox" />
+            <label class="switch" for="show-fireteam-clan-rank">
+              <input id="show-fireteam-clan-rank" type="checkbox" />
               <span class="switch-track" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
-              <span class="switch-label" data-fireteam-switch-label>Ativado</span>
+              <span class="switch-label" data-fireteam-clan-label>Ativado</span>
             </label>
           </div>
 
           <div class="setting-row">
             <div class="setting-copy">
-              <p class="setting-title">Intervalo de atualização</p>
-              <p class="setting-help">Com qual frequência verificar o ranking.</p>
+              <p class="setting-title">Mostrar posição do Jogador no Ranking do Clã</p>
+              <p class="setting-help">Exibe sua posição individual dentro do ranking de jogadores do seu clã.</p>
             </div>
 
-            <select id="fireteam-ranking-interval" class="select" aria-label="Intervalo de atualização do ranking fireteam">
+            <label class="switch" for="show-fireteam-player-rank">
+              <input id="show-fireteam-player-rank" type="checkbox" />
+              <span class="switch-track" aria-hidden="true">
+                <span class="switch-thumb"></span>
+              </span>
+              <span class="switch-label" data-fireteam-player-label>Ativado</span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <p class="setting-title">Mostrar pontuação do Ranking Fireteam</p>
+              <p class="setting-help">Exibe a pontuação total do seu clã no ranking fireteam.</p>
+            </div>
+
+            <label class="switch" for="show-fireteam-points">
+              <input id="show-fireteam-points" type="checkbox" />
+              <span class="switch-track" aria-hidden="true">
+                <span class="switch-thumb"></span>
+              </span>
+              <span class="switch-label" data-fireteam-points-label>Ativado</span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <p class="setting-title">Mostrar XP obtido no Fireteam</p>
+              <p class="setting-help">Exibe a experiência acumulada pelo jogador nas partidas de fireteam.</p>
+            </div>
+
+            <label class="switch" for="show-fireteam-player-xp">
+              <input id="show-fireteam-player-xp" type="checkbox" />
+              <span class="switch-track" aria-hidden="true">
+                <span class="switch-thumb"></span>
+              </span>
+              <span class="switch-label" data-fireteam-xp-label>Ativado</span>
+            </label>
+          </div>
+
+        </section>
+
+        <section class="panel">
+          <div class="setting-row">
+            <div class="setting-copy">
+              <p class="setting-title">Intervalo de atualização</p>
+              <p class="setting-help">Frequência de consulta para todos os rankings.</p>
+            </div>
+
+            <select id="ranking-interval" class="select" aria-label="Intervalo de atualização">
               <option value="600000">10 min</option>
               <option value="1200000">20 min</option>
               <option value="1800000">30 min</option>

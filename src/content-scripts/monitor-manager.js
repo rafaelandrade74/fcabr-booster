@@ -45,7 +45,7 @@
     // ---- ExperienceRankingMonitor ----
 
     class ExperienceRankingMonitor extends BaseMonitor {
-        static MIN_INTERVAL_MS = 60000;
+        static MIN_INTERVAL_MS = 600000;
 
         static SYNTHETIC_URL = "fcabr://ranking/experience-position";
         static API_URL = "https://fcabr.net/api/ranking/player?tab=experience&page=1&pageSize=1000&hideBannedUsers=0";
@@ -74,44 +74,63 @@
     class FireteamRankingMonitor extends BaseMonitor {
         static MIN_INTERVAL_MS = 600000;
 
-        static SYNTHETIC_URL_CLAN = "fcabr://ranking/fireteam/clan";
-        static SYNTHETIC_URL_PLAYER = "fcabr://ranking/fireteam/player";
-        static PROFILE_API_URL = "https://fcabr.net/api/profile?userId=";
-        static RANKING_API_URL = "https://fcabr.net/api/ranking/clan/fireteam?page=1&size=1000&ranking=pointTotal";
+        static URL_CLAN = "fcabr://ranking/fireteam/clan";
+        static URL_CLAN_PLAYER = "fcabr://ranking/fireteam/clan/player";
+        static URL_USER_CLAN = "fcabr://ranking/fireteam/user-clan";
+
+        static API_PROFILE = "https://fcabr.net/api/profile?userId=";
+        static API_FIRETEAM_CLAN = "https://fcabr.net/api/ranking/clan/fireteam?page=1&size=1000&ranking=pointTotal";
+        static API_FIRETEAM_CLAN_PLAYERS = "https://fcabr.net/api/ranking/clan/fireteam/{oidGuild}/players?ranking=pointTotal&weekId={weekId}";
 
         async execute() {
+            // 1. Obter userId do localStorage
             const oidUser = getCurrentUserId();
             if (!oidUser) return;
 
-            const profile = await xhrGet(FireteamRankingMonitor.PROFILE_API_URL + oidUser);
+            // 2. Obter oidGuild via profile
+            const profile = await xhrGet(FireteamRankingMonitor.API_PROFILE + oidUser);
             const oidGuild = profile?.data?.clanInfo?.oidGuild;
             if (!oidGuild) return;
 
-            const body = await xhrGet(FireteamRankingMonitor.RANKING_API_URL);
-            if (!body) return;
+            // 3. Consultar FireteamClan — obter posição do clã e currentWeekID
+            const clanBody = await xhrGet(FireteamRankingMonitor.API_FIRETEAM_CLAN);
+            if (!clanBody) return;
 
-            const clans = Array.isArray(body?.data) ? body.data : [];
+            const currentWeekID = clanBody?.meta?.currentWeekID ?? clanBody?.meta?.weekId;
+            const clans = Array.isArray(clanBody?.data) ? clanBody.data : [];
             const clan = clans.find(c => c.oidGuild === oidGuild);
             if (!clan) return;
 
-            postExtensionMessage(FireteamRankingMonitor.SYNTHETIC_URL_CLAN, {
+            // Publicar mapeamento usuário → clã (necessário para renderização em profile.js)
+            postExtensionMessage(FireteamRankingMonitor.URL_USER_CLAN, { oidUser, oidGuild });
+
+            postExtensionMessage(FireteamRankingMonitor.URL_CLAN, {
                 oidGuild: clan.oidGuild,
                 clanName: clan.clanName ?? clan.name,
                 rank: clan.rank,
-                points: clan.pointTotal ?? clan.points ?? 0
+                pointTotal: clan.pointTotal ?? clan.points ?? 0
             });
 
-            if (Array.isArray(clan.members)) {
-                const member = clan.members.find(m => m.oidUser === oidUser);
-                if (member) {
-                    postExtensionMessage(FireteamRankingMonitor.SYNTHETIC_URL_PLAYER, {
-                        oidUser: member.oidUser,
-                        ingameName: member.ingameName ?? member.inGameName,
-                        rank: member.rank,
-                        points: member.points ?? 0
-                    });
-                }
-            }
+            if (!currentWeekID) return;
+
+            // 4. Consultar FireteamClanPlayer — posição do jogador no ranking do clã
+            const playersUrl = FireteamRankingMonitor.API_FIRETEAM_CLAN_PLAYERS
+                .replace("{oidGuild}", oidGuild)
+                .replace("{weekId}", currentWeekID);
+
+            const playersBody = await xhrGet(playersUrl);
+            if (!playersBody) return;
+
+            const players = Array.isArray(playersBody?.data) ? playersBody.data : [];
+            const player = players.find(p => p.oidUser === oidUser);
+            if (!player) return;
+
+            postExtensionMessage(FireteamRankingMonitor.URL_CLAN_PLAYER, {
+                oidUser: player.oidUser,
+                rank: player.rank,
+                pointTotal: player.pointTotal ?? player.points ?? 0,
+                xp: player.expTotal ?? 0
+            });
         }
     }
 

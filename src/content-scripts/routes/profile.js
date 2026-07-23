@@ -1,5 +1,6 @@
 import DOM from "../../lib/dom";
 import ExperienceCard from "../../lib/experience-card";
+import FireteamCard from "../../lib/fireteam-card";
 import patentes from "../../data/patents";
 import { initializeStoredValues } from "../../utils";
 import { DEFAULT_SETTINGS } from "../../utils/settings";
@@ -113,41 +114,71 @@ export async function profilePage() {
 
     const storedSettings = await initializeStoredValues(DEFAULT_SETTINGS);
     const shouldShowNextPatent = Boolean(storedSettings.showNextPatent);
+    const isOwnProfile = tipoPagina === "PFP";
+    const shouldShowAnyFireteam = isOwnProfile && (
+        storedSettings.showFireteamClanRank ||
+        storedSettings.showFireteamPlayerRank ||
+        storedSettings.showFireteamPoints ||
+        storedSettings.showFireteamPlayerXp
+    );
 
-    if (!shouldShowNextPatent) {
-        return;
-    }
+    if (!shouldShowNextPatent && !shouldShowAnyFireteam) return;
 
     // Aguardar até que o elemento de Experiência esteja presente na página.
     await DOM.waitUntil(() => ExperienceCard.findCardElementByName(translations, tipoPagina), 10000);
 
     const cardElement = ExperienceCard.findCardElementByName(translations, tipoPagina);
-    if (!cardElement) {
-        return;
-    }
-
-    const currentPatent = patentes.find((patent) => patent.name === data.data.patenteAtual);
-
-    if (!currentPatent) {
-        return;
-    }
-
-    const currentExperiencePoints = data.data.exp;
-    const nextExperiencePoints = data.data.expNecessario || currentExperiencePoints;
-    const baseExperiencePoints = currentPatent.targetXp;
-    const remainingExperiencePoints = Math.max(0, nextExperiencePoints - currentExperiencePoints);
+    if (!cardElement) return;
 
     const card = new ExperienceCard(translations, tipoPagina);
 
-    card.setBaseXp(baseExperiencePoints);
-    card.setRemaining(remainingExperiencePoints);
-    card.setNextXp(nextExperiencePoints);
-    card.setProgress(currentExperiencePoints, baseExperiencePoints, nextExperiencePoints);
+    // ---- Renderização do card de XP ----
+    if (shouldShowNextPatent) {
+        const currentPatent = patentes.find((patent) => patent.name === data.data.patenteAtual);
 
-    if (tipoPagina === "PFP") {
-        const rankData = StorageService.get(`${RouteKeys.ExperienceRankingPosition}-${data.data.oidUser}`);
-        if (rankData?.rank) {
-            card.setRankingBadge(rankData.rank);
+        if (currentPatent) {
+            const currentExperiencePoints = data.data.exp;
+            const nextExperiencePoints = data.data.expNecessario || currentExperiencePoints;
+            const baseExperiencePoints = currentPatent.targetXp;
+            const remainingExperiencePoints = Math.max(0, nextExperiencePoints - currentExperiencePoints);
+
+            card.setBaseXp(baseExperiencePoints);
+            card.setRemaining(remainingExperiencePoints);
+            card.setNextXp(nextExperiencePoints);
+            card.setProgress(currentExperiencePoints, baseExperiencePoints, nextExperiencePoints);
+        }
+
+        if (isOwnProfile) {
+            const rankData = StorageService.get(`${RouteKeys.ExperienceRankingPosition}-${data.data.oidUser}`);
+            if (rankData?.rank) {
+                card.setRankingBadge(rankData.rank);
+            }
+        }
+    }
+
+    // ---- Renderização do card de Fireteam ----
+    if (shouldShowAnyFireteam) {
+        const oidUser = data.data.oidUser;
+        const userClan = StorageService.get(`${RouteKeys.FireteamUserClan}-${oidUser}`);
+        const clanData = userClan?.oidGuild
+            ? StorageService.get(`${RouteKeys.FireteamClan}-${userClan.oidGuild}`)
+            : null;
+        const playerData = StorageService.get(`${RouteKeys.FireteamClanPlayer}-${oidUser}`);
+
+        if (clanData || playerData) {
+            const allCards = ExperienceCard.findAllCardElements(translations, tipoPagina);
+            const targets = allCards.length > 0 ? allCards : [cardElement];
+            const renderOptions = {
+                showClanRank: Boolean(storedSettings.showFireteamClanRank),
+                showPlayerRank: Boolean(storedSettings.showFireteamPlayerRank),
+                showPoints: Boolean(storedSettings.showFireteamPoints),
+                showPlayerXp: Boolean(storedSettings.showFireteamPlayerXp),
+                clanData,
+                playerData
+            };
+            for (const target of targets) {
+                FireteamCard.render(target, translations, renderOptions);
+            }
         }
     }
 

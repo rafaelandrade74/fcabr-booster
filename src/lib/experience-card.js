@@ -28,6 +28,28 @@ export default class ExperienceCard {
     }
 
     /**
+     * Retorna todos os cards de XP no DOM (mobile + desktop do Next.js).
+     * @param {Translations} translations
+     * @param {string} tipoPagina
+     * @returns {HTMLElement[]}
+     */
+    static findAllCardElements(translations, tipoPagina) {
+        if (tipoPagina === "PF") {
+            return DOM.$$("span")
+                .filter(el => el.textContent.trim() === translations.Profile["xp-label"])
+                .map(el => el.closest("div.rounded-lg"))
+                .filter(Boolean);
+        }
+        if (tipoPagina === "PFP") {
+            return DOM.$$("div.inline-flex.rounded.border > button")
+                .filter(el => el.textContent.trim() === translations.Profile["xp-label-btn"])
+                .map(el => el.closest("div.rounded-lg"))
+                .filter(Boolean);
+        }
+        return [];
+    }
+
+    /**
      * @param {Translations} translations
      * @returns {HTMLElement | null}
      */
@@ -109,27 +131,67 @@ export default class ExperienceCard {
         return tabEl?.parentElement || null;
     }
 
+    /** @returns {HTMLElement | null} */
+    _getBadgeContainer() {
+        if (!this.card) return null;
+
+        // O nome do player está no card externo (parentElement), não no card interno de XP
+        const outerCard = this.card.parentElement;
+        const ATTR = "data-fcabr-badge-container";
+        let container = outerCard?.querySelector(`[${ATTR}]`) ?? this.card.querySelector(`[${ATTR}]`);
+
+        if (!container) {
+            container = document.createElement("div");
+            container.setAttribute(ATTR, "");
+            container.style.cssText = [
+                "display:flex",
+                "align-items:center",
+                "gap:6px",
+                "margin-top:4px",
+            ].join(";");
+
+            const nameEl = outerCard?.querySelector('[class*="text-4xl"]') ?? null;
+            // outerRow = div.flex.flex-wrap.justify-between (linha topo do card)
+            const outerRow = nameEl?.parentElement?.parentElement?.parentElement ?? null;
+            if (outerRow) {
+                // margin-left:auto empurra para a direita sem entrar nas divs existentes
+                container.style.marginLeft = "auto";
+                // Insere antes da coluna de redes sociais (último filho)
+                const socialCol = outerRow.lastElementChild;
+                outerRow.insertBefore(container, socialCol);
+            } else {
+                this.card.appendChild(container);
+            }
+        }
+
+        return container;
+    }
+
     /**
-     * Injeta ou atualiza o badge "Top #N" no header do card.
+     * Injeta ou atualiza um badge no container do header.
      * Idempotente: chamadas subsequentes apenas atualizam o número.
      * @param {number} rank
+     * @param {string} attrName
+     * @param {string} labelText
+     * @param {() => SVGSVGElement} createIconFn
      */
-    setRankingBadge(rank) {
+    _renderBadge(rank, attrName, labelText, createIconFn) {
         if (!rank) return;
-        const header = this.getHeader();
-        if (!header) return;
 
-        const ATTR = "data-fcabr-rank-badge";
-        let badge = header.querySelector(`[${ATTR}]`);
+        const container = this._getBadgeContainer();
+        if (!container) return;
+
+        const numAttr = `${attrName}-num`;
+        let badge = container.querySelector(`[${attrName}]`);
 
         if (badge) {
-            const numEl = badge.querySelector("[data-fcabr-rank-num]");
-            if (numEl) numEl.textContent = `Top #${rank}`;
+            const numEl = badge.querySelector(`[${numAttr}]`);
+            if (numEl) numEl.textContent = `${labelText} #${rank}`;
             return;
         }
 
         badge = document.createElement("div");
-        badge.setAttribute(ATTR, "");
+        badge.setAttribute(attrName, "");
         badge.style.cssText = [
             "display:inline-flex",
             "align-items:center",
@@ -138,24 +200,32 @@ export default class ExperienceCard {
             "border:1px solid rgba(240,180,41,.3)",
             "border-radius:5px",
             "padding:3px 9px",
-            "font-size:11px",
+            "font-size:13px",
             "font-weight:700",
             "color:#f0b429",
             "white-space:nowrap",
             "flex-shrink:0",
             "line-height:1.4",
-            "margin-left:auto",
         ].join(";");
 
-        badge.appendChild(createTrophyIcon());
+        badge.appendChild(createIconFn());
 
         const num = document.createElement("span");
-        num.setAttribute("data-fcabr-rank-num", "");
-        num.textContent = `Top #${rank}`;
+        num.setAttribute(numAttr, "");
+        num.textContent = `${labelText} #${rank}`;
         badge.appendChild(num);
 
-        header.appendChild(badge);
+        container.appendChild(badge);
     }
+
+    /**
+     * Injeta ou atualiza o badge "Top #N" (Ranking de Experiência).
+     * @param {number} rank
+     */
+    setRankingBadge(rank) {
+        this._renderBadge(rank, "data-fcabr-rank-badge", "Top", createTrophyIcon);
+    }
+
 
     /** @returns {HTMLElement | null} */
     get progressBar() {
@@ -208,6 +278,7 @@ function createTrophyIcon() {
 
     return svg;
 }
+
 
 /**
  * @param {number} value

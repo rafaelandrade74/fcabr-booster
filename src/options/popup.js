@@ -1,5 +1,5 @@
 import { initializeStoredValues } from "../utils";
-import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS, MIN_FIRETEAM_INTERVAL_MS } from "../utils/settings";
+import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS } from "../utils/settings";
 
 function isAllowedHost(url) {
   if (!url) {
@@ -38,9 +38,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const showExperienceRankingToggle = document.querySelector("#show-experience-ranking");
   const rankingToggleLabel = document.querySelector("[data-ranking-switch-label]");
   const rankingIntervalSelect = document.querySelector("#ranking-interval");
-  const showFireteamRankingToggle = document.querySelector("#show-fireteam-ranking");
-  const fireteamToggleLabel = document.querySelector("[data-fireteam-switch-label]");
-  const fireteamRankingIntervalSelect = document.querySelector("#fireteam-ranking-interval");
+  const showFireteamClanRankToggle = document.querySelector("#show-fireteam-clan-rank");
+  const fireteamClanLabel = document.querySelector("[data-fireteam-clan-label]");
+  const showFireteamPlayerRankToggle = document.querySelector("#show-fireteam-player-rank");
+  const fireteamPlayerLabel = document.querySelector("[data-fireteam-player-label]");
+  const showFireteamPointsToggle = document.querySelector("#show-fireteam-points");
+  const fireteamPointsLabel = document.querySelector("[data-fireteam-points-label]");
+  const showFireteamPlayerXpToggle = document.querySelector("#show-fireteam-player-xp");
+  const fireteamXpLabel = document.querySelector("[data-fireteam-xp-label]");
   const saveButton = document.querySelector("#save-settings");
 
   const activeTabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -58,29 +63,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   renderToggleState(showNextPatentToggle, toggleLabel, Boolean(storedSettings.showNextPatent));
   renderToggleState(showExperienceRankingToggle, rankingToggleLabel, Boolean(storedSettings.showExperienceRanking));
-  renderToggleState(showFireteamRankingToggle, fireteamToggleLabel, Boolean(storedSettings.showFireteamRanking));
+  renderToggleState(showFireteamClanRankToggle, fireteamClanLabel, Boolean(storedSettings.showFireteamClanRank));
+  renderToggleState(showFireteamPlayerRankToggle, fireteamPlayerLabel, Boolean(storedSettings.showFireteamPlayerRank));
+  renderToggleState(showFireteamPointsToggle, fireteamPointsLabel, Boolean(storedSettings.showFireteamPoints));
+  renderToggleState(showFireteamPlayerXpToggle, fireteamXpLabel, Boolean(storedSettings.showFireteamPlayerXp));
 
   if (rankingIntervalSelect) {
-    const storedInterval = Number(storedSettings.experienceRankingInterval);
+    const storedInterval = Number(storedSettings.rankingInterval);
     const safeInterval = Math.max(MIN_RANKING_INTERVAL_MS, storedInterval);
     rankingIntervalSelect.value = String(safeInterval);
     if (rankingIntervalSelect.value !== String(safeInterval)) {
       rankingIntervalSelect.value = String(MIN_RANKING_INTERVAL_MS);
     }
     if (safeInterval !== storedInterval) {
-      await chrome.storage.local.set({ experienceRankingInterval: safeInterval });
-    }
-  }
-
-  if (fireteamRankingIntervalSelect) {
-    const storedInterval = Number(storedSettings.fireteamRankingInterval);
-    const safeInterval = Math.max(MIN_FIRETEAM_INTERVAL_MS, storedInterval);
-    fireteamRankingIntervalSelect.value = String(safeInterval);
-    if (fireteamRankingIntervalSelect.value !== String(safeInterval)) {
-      fireteamRankingIntervalSelect.value = String(MIN_FIRETEAM_INTERVAL_MS);
-    }
-    if (safeInterval !== storedInterval) {
-      await chrome.storage.local.set({ fireteamRankingInterval: safeInterval });
+      await chrome.storage.local.set({ rankingInterval: safeInterval });
     }
   }
 
@@ -92,17 +88,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderToggleState(showExperienceRankingToggle, rankingToggleLabel, event.target.checked);
   });
 
-  showFireteamRankingToggle?.addEventListener("change", (event) => {
-    renderToggleState(showFireteamRankingToggle, fireteamToggleLabel, event.target.checked);
+  showFireteamClanRankToggle?.addEventListener("change", (event) => {
+    renderToggleState(showFireteamClanRankToggle, fireteamClanLabel, event.target.checked);
+  });
+
+  showFireteamPlayerRankToggle?.addEventListener("change", (event) => {
+    renderToggleState(showFireteamPlayerRankToggle, fireteamPlayerLabel, event.target.checked);
+  });
+
+  showFireteamPointsToggle?.addEventListener("change", (event) => {
+    renderToggleState(showFireteamPointsToggle, fireteamPointsLabel, event.target.checked);
+  });
+
+  showFireteamPlayerXpToggle?.addEventListener("change", (event) => {
+    renderToggleState(showFireteamPlayerXpToggle, fireteamXpLabel, event.target.checked);
   });
 
   saveButton?.addEventListener("click", async () => {
     await chrome.storage.local.set({
       showNextPatent: showNextPatentToggle?.checked ?? false,
       showExperienceRanking: showExperienceRankingToggle?.checked ?? false,
-      experienceRankingInterval: Number(rankingIntervalSelect?.value ?? 600000),
-      showFireteamRanking: showFireteamRankingToggle?.checked ?? false,
-      fireteamRankingInterval: Number(fireteamRankingIntervalSelect?.value ?? 600000),
+      showFireteamClanRank: showFireteamClanRankToggle?.checked ?? false,
+      showFireteamPlayerRank: showFireteamPlayerRankToggle?.checked ?? false,
+      showFireteamPoints: showFireteamPointsToggle?.checked ?? false,
+      showFireteamPlayerXp: showFireteamPlayerXpToggle?.checked ?? false,
+      rankingInterval: Number(rankingIntervalSelect?.value ?? 600000),
     });
 
     const activeTab = activeTabs[0];
