@@ -8,7 +8,7 @@ module.exports = (_, argv = {}) => ({
     popup: path.resolve(__dirname, "src/options/popup.js"),
     "content-scripts/content": path.resolve(__dirname,"src/content-scripts/content.js",),
     "content-scripts/inject": path.resolve(__dirname,"src/content-scripts/inject.js",),
-    "content-scripts/ranking-monitor": path.resolve(__dirname,"src/content-scripts/ranking-monitor.js",),
+    "content-scripts/monitor-manager": path.resolve(__dirname,"src/content-scripts/monitor-manager.js",),
   },
   output: {
     path: path.resolve(__dirname, "dist"),

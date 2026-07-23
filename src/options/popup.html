@@ -75,6 +75,43 @@
               <option value="1800000">30 min</option>
             </select>
           </div>
+        </section>
+
+        <section class="panel" aria-labelledby="fireteam-ranking-title">
+          <div class="panel-header">
+            <h2 id="fireteam-ranking-title">Ranking Semanal Fireteam</h2>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <p class="setting-title">Visualizar posição no Ranking Semanal Fireteam</p>
+              <p class="setting-help">Ative para consultar e exibir sua posição e a do seu clã no ranking semanal de fireteam.</p>
+            </div>
+
+            <label class="switch" for="show-fireteam-ranking">
+              <input id="show-fireteam-ranking" type="checkbox" />
+              <span class="switch-track" aria-hidden="true">
+                <span class="switch-thumb"></span>
+              </span>
+              <span class="switch-label" data-fireteam-switch-label>Ativado</span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <p class="setting-title">Intervalo de atualização</p>
+              <p class="setting-help">Com qual frequência verificar o ranking.</p>
+            </div>
+
+            <select id="fireteam-ranking-interval" class="select" aria-label="Intervalo de atualização do ranking fireteam">
+              <option value="600000">10 min</option>
+              <option value="1200000">20 min</option>
+              <option value="1800000">30 min</option>
+              <option value="2400000">40 min</option>
+              <option value="3000000">50 min</option>
+              <option value="3600000">1 hora</option>
+            </select>
+          </div>
 
           <button id="save-settings" class="save-button" type="button">Salvar e atualizar</button>
         </section>
