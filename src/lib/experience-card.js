@@ -145,11 +145,14 @@ export default class ExperienceCard {
                 "display:flex",
                 "align-items:center",
                 "gap:6px",
-                "padding-top:8px",
+                "margin-top:4px",
             ].join(";");
-            const footer = this.getFooter();
-            if (footer) {
-                footer.insertAdjacentElement("afterend", container);
+
+            // Insere após o nome do player (elemento antes dos botões de tab)
+            const tabEl = this.card.querySelector("div.inline-flex.rounded.border");
+            const nameEl = tabEl?.previousElementSibling ?? null;
+            if (nameEl) {
+                nameEl.insertAdjacentElement("afterend", container);
             } else {
                 this.card.appendChild(container);
             }
