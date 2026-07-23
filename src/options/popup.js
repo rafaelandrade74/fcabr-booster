@@ -1,6 +1,9 @@
 import { initializeStoredValues } from "../utils";
 import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS } from "../utils/settings";
 
+const DEFAULT_ACCORDION_GROUP = "patents";
+const ACCORDION_STORAGE_KEY = "activeAccordionGroup";
+
 function isAllowedHost(url) {
   if (!url) {
     return false;
@@ -28,6 +31,37 @@ function renderToggleState(toggleElement, labelElement, isEnabled) {
   if (labelElement) {
     labelElement.textContent = isEnabled ? "Ativado" : "Desativado";
   }
+}
+
+function initAccordion(activeGroup) {
+  const items = document.querySelectorAll(".accordion-item");
+
+  items.forEach((item) => {
+    const group = item.dataset.group;
+    const trigger = item.querySelector(".accordion-trigger");
+
+    if (group === activeGroup) {
+      item.classList.add("is-open");
+      trigger.setAttribute("aria-expanded", "true");
+    }
+
+    trigger.addEventListener("click", () => {
+      const isOpen = item.classList.contains("is-open");
+
+      items.forEach((i) => {
+        i.classList.remove("is-open");
+        i.querySelector(".accordion-trigger").setAttribute("aria-expanded", "false");
+      });
+
+      if (!isOpen) {
+        item.classList.add("is-open");
+        trigger.setAttribute("aria-expanded", "true");
+        chrome.storage.local.set({ [ACCORDION_STORAGE_KEY]: group });
+      } else {
+        chrome.storage.local.set({ [ACCORDION_STORAGE_KEY]: null });
+      }
+    });
+  });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -61,7 +95,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const storedSettings = await initializeStoredValues(DEFAULT_SETTINGS);
+  const [storedSettings, accordionStorage] = await Promise.all([
+    initializeStoredValues(DEFAULT_SETTINGS),
+    chrome.storage.local.get(ACCORDION_STORAGE_KEY),
+  ]);
+
+  const activeGroup = accordionStorage[ACCORDION_STORAGE_KEY] ?? DEFAULT_ACCORDION_GROUP;
+  initAccordion(activeGroup);
 
   renderToggleState(showNextPatentToggle, toggleLabel, Boolean(storedSettings.showNextPatent));
   renderToggleState(showExperienceRankingToggle, rankingToggleLabel, Boolean(storedSettings.showExperienceRanking));

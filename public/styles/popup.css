@@ -7,6 +7,8 @@
   --accent: #9ae600;
   --border: rgba(255, 255, 255, 0.08);
   --select-bg: #1c2128;
+  --trigger-hover: rgba(255, 255, 255, 0.04);
+  --trigger-open-bg: rgba(154, 230, 0, 0.06);
 }
 
 * {
@@ -21,7 +23,6 @@ body {
 }
 
 body {
-  min-height: 100vh;
   font-family: Arial, Helvetica, sans-serif;
   color: var(--text);
   background: var(--bg);
@@ -45,19 +46,22 @@ button {
 .shell {
   min-width: 300px;
   max-width: 340px;
-  padding: 12px;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--shell);
+  overflow: hidden;
 }
 
+/* ── Hero ── */
+
 .hero {
-  margin-bottom: 8px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
 }
 
 .eyebrow {
-  margin: 0 0 4px;
-  font-size: 0.64rem;
+  margin: 0 0 2px;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -82,28 +86,106 @@ h1 {
   line-height: 1.3;
 }
 
-.panel {
+/* ── Accordion ── */
+
+.accordion {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
-.panel-header {
-  margin-bottom: 0;
+.accordion-item {
+  border-bottom: 1px solid var(--border);
 }
 
-.panel-kicker {
-  margin-bottom: 2px;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.accordion-item:last-child {
+  border-bottom: none;
+}
+
+.accordion-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--text);
+  text-align: left;
+  transition: background-color 140ms ease;
+}
+
+.accordion-trigger:hover {
+  background: var(--trigger-hover);
+}
+
+.accordion-item.is-open > .accordion-trigger {
+  background: var(--trigger-open-bg);
   color: var(--accent);
 }
 
-.panel h2 {
-  font-size: 0.88rem;
+.accordion-emoji {
+  font-size: 0.9rem;
+  flex: 0 0 auto;
+  line-height: 1;
 }
+
+.accordion-label {
+  flex: 1;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.accordion-chevron {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+  transition: transform 200ms ease, color 140ms ease;
+}
+
+.accordion-item.is-open > .accordion-trigger .accordion-chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+/* ── Accordion Panel ── */
+
+.accordion-panel {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 240ms ease;
+}
+
+.accordion-item.is-open > .accordion-panel {
+  max-height: 560px;
+}
+
+.accordion-panel-inner {
+  padding: 4px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Subgroup kicker ── */
+
+.subgroup-kicker {
+  padding-top: 10px;
+  padding-bottom: 2px;
+  font-size: 0.60rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.subgroup-kicker:first-child {
+  padding-top: 2px;
+}
+
+/* ── Setting row ── */
 
 .setting-row {
   display: flex;
@@ -118,16 +200,18 @@ h1 {
 }
 
 .setting-title {
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   font-weight: 600;
   margin-bottom: 2px;
 }
 
 .setting-help {
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   line-height: 1.3;
 }
+
+/* ── Switch ── */
 
 .switch {
   display: inline-flex;
@@ -191,6 +275,8 @@ h1 {
   color: var(--text);
 }
 
+/* ── Select ── */
+
 .select {
   flex: 0 0 auto;
   padding: 5px 8px;
@@ -215,14 +301,10 @@ h1 {
   outline-offset: 2px;
 }
 
-.panel + .panel {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
-}
+/* ── Save button ── */
 
 .save-button {
-  margin-top: 6px;
+  margin-top: 8px;
   padding: 8px 12px;
   width: 100%;
   border-radius: 10px;
@@ -237,9 +319,14 @@ h1 {
   background: #b9f24b;
 }
 
+/* ── Restricted state ── */
+
 .shell--restricted {
+  padding: 12px 14px;
   text-align: left;
 }
+
+/* ── Responsive ── */
 
 @media (max-width: 360px) {
   .popup {
@@ -248,7 +335,6 @@ h1 {
 
   .shell {
     min-width: 0;
-    padding: 10px;
   }
 
   .setting-row {
