@@ -38,8 +38,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const showExperienceRankingToggle = document.querySelector("#show-experience-ranking");
   const rankingToggleLabel = document.querySelector("[data-ranking-switch-label]");
   const rankingIntervalSelect = document.querySelector("#ranking-interval");
-  const showFireteamRankingToggle = document.querySelector("#show-fireteam-ranking");
-  const fireteamToggleLabel = document.querySelector("[data-fireteam-switch-label]");
+  const showFireteamClanRankToggle = document.querySelector("#show-fireteam-clan-rank");
+  const fireteamClanLabel = document.querySelector("[data-fireteam-clan-label]");
+  const showFireteamPlayerRankToggle = document.querySelector("#show-fireteam-player-rank");
+  const fireteamPlayerLabel = document.querySelector("[data-fireteam-player-label]");
+  const showFireteamPointsToggle = document.querySelector("#show-fireteam-points");
+  const fireteamPointsLabel = document.querySelector("[data-fireteam-points-label]");
   const fireteamRankingIntervalSelect = document.querySelector("#fireteam-ranking-interval");
   const saveButton = document.querySelector("#save-settings");
 
@@ -58,7 +62,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   renderToggleState(showNextPatentToggle, toggleLabel, Boolean(storedSettings.showNextPatent));
   renderToggleState(showExperienceRankingToggle, rankingToggleLabel, Boolean(storedSettings.showExperienceRanking));
-  renderToggleState(showFireteamRankingToggle, fireteamToggleLabel, Boolean(storedSettings.showFireteamRanking));
+  renderToggleState(showFireteamClanRankToggle, fireteamClanLabel, Boolean(storedSettings.showFireteamClanRank));
+  renderToggleState(showFireteamPlayerRankToggle, fireteamPlayerLabel, Boolean(storedSettings.showFireteamPlayerRank));
+  renderToggleState(showFireteamPointsToggle, fireteamPointsLabel, Boolean(storedSettings.showFireteamPoints));
 
   if (rankingIntervalSelect) {
     const storedInterval = Number(storedSettings.experienceRankingInterval);
@@ -92,8 +98,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderToggleState(showExperienceRankingToggle, rankingToggleLabel, event.target.checked);
   });
 
-  showFireteamRankingToggle?.addEventListener("change", (event) => {
-    renderToggleState(showFireteamRankingToggle, fireteamToggleLabel, event.target.checked);
+  showFireteamClanRankToggle?.addEventListener("change", (event) => {
+    renderToggleState(showFireteamClanRankToggle, fireteamClanLabel, event.target.checked);
+  });
+
+  showFireteamPlayerRankToggle?.addEventListener("change", (event) => {
+    renderToggleState(showFireteamPlayerRankToggle, fireteamPlayerLabel, event.target.checked);
+  });
+
+  showFireteamPointsToggle?.addEventListener("change", (event) => {
+    renderToggleState(showFireteamPointsToggle, fireteamPointsLabel, event.target.checked);
   });
 
   saveButton?.addEventListener("click", async () => {
@@ -101,7 +115,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       showNextPatent: showNextPatentToggle?.checked ?? false,
       showExperienceRanking: showExperienceRankingToggle?.checked ?? false,
       experienceRankingInterval: Number(rankingIntervalSelect?.value ?? 600000),
-      showFireteamRanking: showFireteamRankingToggle?.checked ?? false,
+      showFireteamClanRank: showFireteamClanRankToggle?.checked ?? false,
+      showFireteamPlayerRank: showFireteamPlayerRankToggle?.checked ?? false,
+      showFireteamPoints: showFireteamPointsToggle?.checked ?? false,
       fireteamRankingInterval: Number(fireteamRankingIntervalSelect?.value ?? 600000),
     });
 

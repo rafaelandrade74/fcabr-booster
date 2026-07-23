@@ -5,17 +5,17 @@ export function storageKeyExperienceRankingPosition(data) {
     return `${RouteKeys.ExperienceRankingPosition}-${data.oidUser}`;
 }
 
-export function storageKeyPlayerFireteamRanking(data) {
-    if (!data?.oidUser) return null;
-    return `${RouteKeys.PlayerFireteamRanking}-${data.oidUser}`;
-}
-
-export function storageKeyClanFireteamRanking(data) {
+export function storageKeyFireteamClan(data) {
     if (!data?.oidGuild) return null;
-    return `${RouteKeys.ClanFireteamRanking}-${data.oidGuild}`;
+    return `${RouteKeys.FireteamClan}-${data.oidGuild}`;
 }
 
-export function storageKeyFireteamUserMeta(data) {
+export function storageKeyFireteamClanPlayer(data) {
     if (!data?.oidUser) return null;
-    return `${RouteKeys.FireteamUserMeta}-${data.oidUser}`;
+    return `${RouteKeys.FireteamClanPlayer}-${data.oidUser}`;
+}
+
+export function storageKeyFireteamUserClan(data) {
+    if (!data?.oidUser) return null;
+    return `${RouteKeys.FireteamUserClan}-${data.oidUser}`;
 }

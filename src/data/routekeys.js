@@ -1,7 +1,7 @@
 export const RouteKeys = {
     GoaRankStatus: "goa-rank-status",
     ExperienceRankingPosition: "experience-ranking-position",
-    PlayerFireteamRanking: "player-fireteam-ranking",
-    ClanFireteamRanking: "clan-fireteam-ranking",
-    FireteamUserMeta: "fireteam-user-meta"
+    FireteamClan: "fireteam-clan",
+    FireteamClanPlayer: "fireteam-clan-player",
+    FireteamUserClan: "fireteam-user-clan"
 };

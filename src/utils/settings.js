@@ -5,6 +5,8 @@ export const DEFAULT_SETTINGS = {
   showNextPatent: true,
   showExperienceRanking: false,
   experienceRankingInterval: 600000,
-  showFireteamRanking: false,
+  showFireteamClanRank: false,
+  showFireteamPlayerRank: false,
+  showFireteamPoints: false,
   fireteamRankingInterval: 600000
 };

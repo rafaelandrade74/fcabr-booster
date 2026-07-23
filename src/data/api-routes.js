@@ -1,9 +1,9 @@
 import { storageKeyGoaRankStatus } from "../content-scripts/routes/profile.js";
 import {
     storageKeyExperienceRankingPosition,
-    storageKeyPlayerFireteamRanking,
-    storageKeyClanFireteamRanking,
-    storageKeyFireteamUserMeta
+    storageKeyFireteamClan,
+    storageKeyFireteamClanPlayer,
+    storageKeyFireteamUserClan
 } from "../content-scripts/routes/ranking.js";
 
 export const apiRoutes = [
@@ -16,16 +16,16 @@ export const apiRoutes = [
         storageKey: storageKeyExperienceRankingPosition
     },
     {
-        regex: /^fcabr:\/\/ranking\/fireteam\/player$/,
-        storageKey: storageKeyPlayerFireteamRanking
-    },
-    {
         regex: /^fcabr:\/\/ranking\/fireteam\/clan$/,
-        storageKey: storageKeyClanFireteamRanking
+        storageKey: storageKeyFireteamClan
     },
     {
-        regex: /^fcabr:\/\/ranking\/fireteam\/meta$/,
-        storageKey: storageKeyFireteamUserMeta
+        regex: /^fcabr:\/\/ranking\/fireteam\/clan\/player$/,
+        storageKey: storageKeyFireteamClanPlayer
+    },
+    {
+        regex: /^fcabr:\/\/ranking\/fireteam\/user-clan$/,
+        storageKey: storageKeyFireteamUserClan
     }
 ];
 

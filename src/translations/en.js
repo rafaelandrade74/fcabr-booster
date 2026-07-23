@@ -3,8 +3,9 @@ export default {
     "xp-remaining-bg": "XP remaining",
     "xp-label": "Experience",
     "xp-label-btn": "EXP",
-    "fireteam-clan-badge-label": "Clan",
-    "fireteam-player-badge-label": "Fireteam"
+    "fireteam-clan-rank-label": "Clan Rank",
+    "fireteam-player-rank-label": "Player Rank",
+    "fireteam-points-label": "Points"
   },
   "lang": "en"
 }

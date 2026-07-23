@@ -192,23 +192,6 @@ export default class ExperienceCard {
         this._renderBadge(rank, "data-fcabr-rank-badge", "Top", createTrophyIcon);
     }
 
-    /**
-     * Injeta ou atualiza o badge do clã no Ranking Semanal Fireteam.
-     * @param {number} rank
-     */
-    setFireteamClanBadge(rank) {
-        const label = this.translations?.Profile?.["fireteam-clan-badge-label"] || "Clã";
-        this._renderBadge(rank, "data-fcabr-fireteam-clan-badge", label, createShieldIcon);
-    }
-
-    /**
-     * Injeta ou atualiza o badge do jogador no Ranking Semanal Fireteam.
-     * @param {number} rank
-     */
-    setFireteamPlayerBadge(rank) {
-        const label = this.translations?.Profile?.["fireteam-player-badge-label"] || "Fireteam";
-        this._renderBadge(rank, "data-fcabr-fireteam-player-badge", label, createUsersIcon);
-    }
 
     /** @returns {HTMLElement | null} */
     get progressBar() {
@@ -262,59 +245,6 @@ function createTrophyIcon() {
     return svg;
 }
 
-/** @returns {SVGSVGElement} */
-function createShieldIcon() {
-    const NS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(NS, "svg");
-    svg.setAttribute("width", "11");
-    svg.setAttribute("height", "11");
-    svg.setAttribute("viewBox", "0 0 24 24");
-    svg.setAttribute("fill", "none");
-    svg.setAttribute("stroke", "currentColor");
-    svg.setAttribute("stroke-width", "2.5");
-    svg.setAttribute("stroke-linecap", "round");
-    svg.setAttribute("stroke-linejoin", "round");
-    svg.style.flexShrink = "0";
-
-    const path = document.createElementNS(NS, "path");
-    path.setAttribute("d", "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z");
-    svg.appendChild(path);
-
-    return svg;
-}
-
-/** @returns {SVGSVGElement} */
-function createUsersIcon() {
-    const NS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(NS, "svg");
-    svg.setAttribute("width", "11");
-    svg.setAttribute("height", "11");
-    svg.setAttribute("viewBox", "0 0 24 24");
-    svg.setAttribute("fill", "none");
-    svg.setAttribute("stroke", "currentColor");
-    svg.setAttribute("stroke-width", "2.5");
-    svg.setAttribute("stroke-linecap", "round");
-    svg.setAttribute("stroke-linejoin", "round");
-    svg.style.flexShrink = "0";
-
-    [
-        "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2",
-        "M23 21v-2a4 4 0 0 0-3-3.87",
-        "M16 3.13a4 4 0 0 1 0 7.75",
-    ].forEach(d => {
-        const path = document.createElementNS(NS, "path");
-        path.setAttribute("d", d);
-        svg.appendChild(path);
-    });
-
-    const circle = document.createElementNS(NS, "circle");
-    circle.setAttribute("cx", "9");
-    circle.setAttribute("cy", "7");
-    circle.setAttribute("r", "4");
-    svg.appendChild(circle);
-
-    return svg;
-}
 
 /**
  * @param {number} value

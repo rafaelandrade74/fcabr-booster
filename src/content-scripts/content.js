@@ -13,13 +13,14 @@ script.onload = () => script.remove();
 (document.head || document.documentElement).appendChild(script);
 
 initializeStoredValues(DEFAULT_SETTINGS).then(settings => {
-    if (!settings.showExperienceRanking && !settings.showFireteamRanking) return;
+    const isFireteamEnabled = settings.showFireteamClanRank || settings.showFireteamPlayerRank || settings.showFireteamPoints;
+    if (!settings.showExperienceRanking && !isFireteamEnabled) return;
 
     const managerScript = document.createElement("script");
     managerScript.src = chrome.runtime.getURL("scripts/content-scripts/monitor-manager.js");
     managerScript.dataset.experienceRankingEnabled = settings.showExperienceRanking ? "1" : "0";
     managerScript.dataset.experienceRankingInterval = Math.max(MIN_RANKING_INTERVAL_MS, Number(settings.experienceRankingInterval));
-    managerScript.dataset.fireteamRankingEnabled = settings.showFireteamRanking ? "1" : "0";
+    managerScript.dataset.fireteamRankingEnabled = isFireteamEnabled ? "1" : "0";
     managerScript.dataset.fireteamRankingInterval = Math.max(MIN_FIRETEAM_INTERVAL_MS, Number(settings.fireteamRankingInterval));
     managerScript.onload = () => managerScript.remove();
     (document.head || document.documentElement).appendChild(managerScript);
