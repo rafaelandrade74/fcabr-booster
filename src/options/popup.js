@@ -1,14 +1,11 @@
 import { initializeStoredValues } from "../utils";
 import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS } from "../utils/settings";
 
-const DEFAULT_ACCORDION_GROUP = "patents";
-const ACCORDION_STORAGE_KEY = "activeAccordionGroup";
+const DEFAULT_PANEL = "patents";
+const PANEL_STORAGE_KEY = "activeAccordionGroup";
 
 function isAllowedHost(url) {
-  if (!url) {
-    return false;
-  }
-
+  if (!url) return false;
   try {
     const hostname = new URL(url).hostname;
     return hostname === "fcabr.net" || hostname.endsWith(".fcabr.net");
@@ -18,48 +15,36 @@ function isAllowedHost(url) {
 }
 
 function setElementVisibility(element, isHidden) {
-  if (element) {
-    element.hidden = isHidden;
-  }
+  if (element) element.hidden = isHidden;
 }
 
 function renderToggleState(toggleElement, labelElement, isEnabled) {
-  if (toggleElement) {
-    toggleElement.checked = isEnabled;
-  }
-
-  if (labelElement) {
-    labelElement.textContent = isEnabled ? "Ativado" : "Desativado";
-  }
+  if (toggleElement) toggleElement.checked = isEnabled;
+  if (labelElement) labelElement.textContent = isEnabled ? "Ativado" : "Desativado";
 }
 
-function initAccordion(activeGroup) {
-  const items = document.querySelectorAll(".accordion-item");
+function initSidebarNav(activePanel) {
+  const navItems = document.querySelectorAll(".nav-item");
 
-  items.forEach((item) => {
-    const group = item.dataset.group;
-    const trigger = item.querySelector(".accordion-trigger");
+  navItems.forEach((item) => {
+    const panel = item.dataset.panel;
+    const panelEl = document.getElementById(`panel-${panel}`);
 
-    if (group === activeGroup) {
-      item.classList.add("is-open");
-      trigger.setAttribute("aria-expanded", "true");
+    if (panel === activePanel) {
+      item.classList.add("is-active");
+      panelEl?.removeAttribute("hidden");
+    } else {
+      item.classList.remove("is-active");
+      panelEl?.setAttribute("hidden", "");
     }
 
-    trigger.addEventListener("click", () => {
-      const isOpen = item.classList.contains("is-open");
+    item.addEventListener("click", () => {
+      navItems.forEach((i) => i.classList.remove("is-active"));
+      document.querySelectorAll(".panel").forEach((p) => p.setAttribute("hidden", ""));
 
-      items.forEach((i) => {
-        i.classList.remove("is-open");
-        i.querySelector(".accordion-trigger").setAttribute("aria-expanded", "false");
-      });
-
-      if (!isOpen) {
-        item.classList.add("is-open");
-        trigger.setAttribute("aria-expanded", "true");
-        chrome.storage.local.set({ [ACCORDION_STORAGE_KEY]: group });
-      } else {
-        chrome.storage.local.set({ [ACCORDION_STORAGE_KEY]: null });
-      }
+      item.classList.add("is-active");
+      panelEl?.removeAttribute("hidden");
+      chrome.storage.local.set({ [PANEL_STORAGE_KEY]: panel });
     });
   });
 }
@@ -90,17 +75,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   setElementVisibility(popupContent, !isAllowedPage);
   setElementVisibility(restrictedMessage, isAllowedPage);
 
-  if (!isAllowedPage) {
-    return;
-  }
+  if (!isAllowedPage) return;
 
-  const [storedSettings, accordionStorage] = await Promise.all([
+  const [storedSettings, panelStorage] = await Promise.all([
     initializeStoredValues(DEFAULT_SETTINGS),
-    chrome.storage.local.get(ACCORDION_STORAGE_KEY),
+    chrome.storage.local.get(PANEL_STORAGE_KEY),
   ]);
 
-  const activeGroup = accordionStorage[ACCORDION_STORAGE_KEY] ?? DEFAULT_ACCORDION_GROUP;
-  initAccordion(activeGroup);
+  const activePanel = panelStorage[PANEL_STORAGE_KEY] ?? DEFAULT_PANEL;
+  initSidebarNav(activePanel);
 
   renderToggleState(showNextPatentToggle, toggleLabel, Boolean(storedSettings.showNextPatent));
   renderToggleState(showExperienceRankingToggle, rankingToggleLabel, Boolean(storedSettings.showExperienceRanking));

@@ -1,4 +1,4 @@
-const CONTAINER_ATTR = "data-fcabr-fireteam-card";
+export const CONTAINER_ATTR = "data-fcabr-fireteam-card";
 
 export default class FireteamCard {
 

@@ -83,11 +83,8 @@ export default class ExperienceCard {
      */
     setBaseXp(xp) {
         if (xp === undefined || xp === null) return;
-
         const spans = this.getFooterSpans();
-        if (spans[0]) {
-            spans[0].textContent = formatXP(xp, this.translations.lang);
-        }
+        if (spans[0]) setSpanText(spans[0], formatXP(xp, this.translations.lang));
     }
 
     /**
@@ -97,9 +94,8 @@ export default class ExperienceCard {
         if (xp === 0) return;
         if (xp === undefined || xp === null) return;
         const remainingLabel = this.translations?.Profile?.["xp-remaining-bg"] || "XP restante";
-
         const spans = this.getFooterSpans();
-        if (spans[1]) spans[1].textContent = `${formatXP(xp, this.translations.lang)} ${remainingLabel}`;
+        if (spans[1]) setSpanText(spans[1], `${formatXP(xp, this.translations.lang)} ${remainingLabel}`);
     }
 
     /**
@@ -108,9 +104,7 @@ export default class ExperienceCard {
     setNextXp(xp) {
         if (xp === undefined || xp === null) return;
         const spans = this.getFooterSpans();
-        if (spans[2]) {
-            spans[2].textContent = formatXP(xp, this.translations.lang);
-        }
+        if (spans[2]) setSpanText(spans[2], formatXP(xp, this.translations.lang));
     }
 
     /**
@@ -118,11 +112,25 @@ export default class ExperienceCard {
      * Idempotente: registra o listener apenas uma vez por elemento.
      * @param {() => void} callback
      */
-    watchTabSwitch(callback) {
-        const btn = this.card?.querySelector("div.inline-flex.rounded.border > button");
-        if (!btn || btn.hasAttribute("data-fcabr-tab-watch")) return;
-        btn.setAttribute("data-fcabr-tab-watch", "");
-        btn.addEventListener("click", () => setTimeout(callback, 0));
+    /**
+     * @param {() => void} callback - re-injetado após React reconciliar (setTimeout)
+     * @param {(() => void) | null} [beforeCallback] - chamado síncronamente antes de o React processar o clique
+     */
+    watchTabSwitch(callback, beforeCallback = null) {
+        const BADGE_ATTR = "data-fcabr-badge-container";
+        const outerCard = this.card?.parentElement;
+
+        const buttons = this.card?.querySelectorAll("div.inline-flex.rounded.border > button") ?? [];
+        buttons.forEach(btn => {
+            if (btn.hasAttribute("data-fcabr-tab-watch")) return;
+            btn.setAttribute("data-fcabr-tab-watch", "");
+            btn.addEventListener("click", () => {
+                // Remove nossos nós ANTES de o React processar o clique (síncrono = antes do listener delegado do React)
+                outerCard?.querySelector(`[${BADGE_ATTR}]`)?.remove();
+                beforeCallback?.();
+                setTimeout(callback, 0);
+            });
+        });
     }
 
     /** @returns {HTMLElement | null} */
@@ -154,11 +162,9 @@ export default class ExperienceCard {
             // outerRow = div.flex.flex-wrap.justify-between (linha topo do card)
             const outerRow = nameEl?.parentElement?.parentElement?.parentElement ?? null;
             if (outerRow) {
-                // margin-left:auto empurra para a direita sem entrar nas divs existentes
-                container.style.marginLeft = "auto";
-                // Insere antes da coluna de redes sociais (último filho)
-                const socialCol = outerRow.lastElementChild;
-                outerRow.insertBefore(container, socialCol);
+                // Append ao final: React só itera os fibers que conhece e ignora nós extras
+                // no fim do DOM — inserir antes de socialCol quebrava a reconciliação do React
+                outerRow.appendChild(container);
             } else {
                 this.card.appendChild(container);
             }
@@ -279,6 +285,23 @@ function createTrophyIcon() {
     return svg;
 }
 
+
+/**
+ * Atualiza o texto de um span modificando o nó de texto EXISTENTE (nodeValue),
+ * sem remover/recriar o nó — necessário para não desincronizar o fiber tree do React.
+ * Usar span.textContent = x descarta o nó de texto que o React rastreia;
+ * quando o React faz removeChild desse nó ao desmontar, o nó já tem parentNode=null → NotFoundError.
+ * @param {HTMLElement} span
+ * @param {string} value
+ */
+function setSpanText(span, value) {
+    const textNode = span.firstChild;
+    if (textNode?.nodeType === Node.TEXT_NODE) {
+        textNode.nodeValue = value;
+    } else {
+        span.textContent = value;
+    }
+}
 
 /**
  * @param {number} value

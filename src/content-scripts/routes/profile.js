@@ -1,6 +1,6 @@
 import DOM from "../../lib/dom";
 import ExperienceCard from "../../lib/experience-card";
-import FireteamCard from "../../lib/fireteam-card";
+import FireteamCard, { CONTAINER_ATTR as FIRETEAM_CONTAINER_ATTR } from "../../lib/fireteam-card";
 import patentes from "../../data/patents";
 import { initializeStoredValues } from "../../utils";
 import { DEFAULT_SETTINGS } from "../../utils/settings";
@@ -184,5 +184,8 @@ export async function profilePage() {
         }
     }
 
-    card.watchTabSwitch(profilePage);
+    const outerCard = cardElement?.parentElement;
+    card.watchTabSwitch(profilePage, () => {
+        outerCard?.querySelector(`[${FIRETEAM_CONTAINER_ATTR}]`)?.remove();
+    });
 }
