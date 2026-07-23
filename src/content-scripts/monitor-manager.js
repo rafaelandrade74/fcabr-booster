@@ -156,6 +156,7 @@
     class ApiMonitorManager {
         constructor() {
             this._timers = new Map();
+            this._monitors = new Map();
         }
 
         start(dataset) {
@@ -170,8 +171,15 @@
                 );
 
                 const monitor = new entry.MonitorClass(intervalMs);
+                this._monitors.set(entry.id, monitor);
                 monitor.execute();
                 this._timers.set(entry.id, setInterval(() => monitor.execute(), intervalMs));
+            }
+        }
+
+        refresh() {
+            for (const monitor of this._monitors.values()) {
+                monitor.execute();
             }
         }
     }
@@ -185,6 +193,17 @@
         }
     }
 
-    new ApiMonitorManager().start(datasetSnapshot);
+    const manager = new ApiMonitorManager();
+    manager.start(datasetSnapshot);
+
+    // Detecta troca de perfil comparando o ID salvo com o valor atual do localStorage
+    let lastProfileId = getCurrentUserId();
+    setInterval(() => {
+        const currentId = getCurrentUserId();
+        if (currentId !== null && currentId !== lastProfileId) {
+            lastProfileId = currentId;
+            manager.refresh();
+        }
+    }, 1000);
 
 })();

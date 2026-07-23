@@ -187,4 +187,9 @@ export async function profilePage() {
     card.watchTabSwitch(profilePage, () => {
         outerCard?.querySelector(`[${FIRETEAM_CONTAINER_ATTR}]`)?.remove();
     });
+
+    // O card "Em breve" ao lado tem altura fixa (307px); remove para acompanhar o card da extensão
+    const emBreveSpan = DOM.byTextVisible("span", "Em breve");
+    const emBreveCard = emBreveSpan?.closest(".relative");
+    if (emBreveCard) emBreveCard.style.height = "100%";
 }
