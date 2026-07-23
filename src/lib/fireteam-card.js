@@ -19,7 +19,7 @@ export default class FireteamCard {
         }
 
         const container = existing ?? FireteamCard._createContainer(anchor);
-        FireteamCard._populate(container, translations, { showClanRank, showPlayerRank, showPoints, clanData, playerData });
+        FireteamCard._populate(container, translations, { showClanRank, showPlayerRank, showPoints, showPlayerXp, clanData, playerData });
     }
 
     static _createContainer(anchor) {
@@ -82,14 +82,14 @@ export default class FireteamCard {
 
 function createRow(label, value) {
     const row = document.createElement("div");
-    row.style.cssText = "display:flex;justify-content:space-between;align-items:center";
+    row.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0";
 
     const labelEl = document.createElement("span");
-    labelEl.style.cssText = "font-size:12px;color:rgba(255,255,255,0.5);font-weight:500";
+    labelEl.style.cssText = "font-size:12px;color:rgba(255,255,255,0.5);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0";
     labelEl.textContent = label;
 
     const valueEl = document.createElement("span");
-    valueEl.style.cssText = "font-size:13px;font-weight:700;color:#f0b429";
+    valueEl.style.cssText = "font-size:13px;font-weight:700;color:#f0b429;white-space:nowrap;flex-shrink:0";
     valueEl.textContent = value;
 
     row.appendChild(labelEl);
