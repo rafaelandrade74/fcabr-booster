@@ -301,24 +301,6 @@ h1 {
   outline-offset: 2px;
 }
 
-/* ── Save button ── */
-
-.save-button {
-  margin-top: 8px;
-  padding: 8px 12px;
-  width: 100%;
-  border-radius: 10px;
-  background: var(--accent);
-  color: #111;
-  font-weight: 700;
-  font-size: 0.86rem;
-  cursor: pointer;
-}
-
-.save-button:hover {
-  background: #b9f24b;
-}
-
 /* ── Restricted state ── */
 
 .shell--restricted {

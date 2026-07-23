@@ -82,7 +82,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const fireteamPlayerPointsLabel = document.querySelector("[data-fireteam-player-points-label]");
   const showFireteamPlayerXpToggle = document.querySelector("#show-fireteam-player-xp");
   const fireteamXpLabel = document.querySelector("[data-fireteam-xp-label]");
-  const saveButton = document.querySelector("#save-settings");
 
   const activeTabs = await chrome.tabs.query({ active: true, currentWindow: true });
   const currentPageUrl = activeTabs[0]?.url || "";
@@ -123,52 +122,63 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  let settingsChanged = false;
+
+  async function saveToggle(key, checked) {
+    await chrome.storage.local.set({ [key]: checked });
+    settingsChanged = true;
+  }
+
+  async function saveSelect(key, value) {
+    await chrome.storage.local.set({ [key]: Number(value) });
+    settingsChanged = true;
+  }
+
   showNextPatentToggle?.addEventListener("change", (event) => {
     renderToggleState(showNextPatentToggle, toggleLabel, event.target.checked);
+    saveToggle("showNextPatent", event.target.checked);
   });
 
   showExperienceRankingToggle?.addEventListener("change", (event) => {
     renderToggleState(showExperienceRankingToggle, rankingToggleLabel, event.target.checked);
+    saveToggle("showExperienceRanking", event.target.checked);
   });
 
   showFireteamClanRankToggle?.addEventListener("change", (event) => {
     renderToggleState(showFireteamClanRankToggle, fireteamClanLabel, event.target.checked);
+    saveToggle("showFireteamClanRank", event.target.checked);
   });
 
   showFireteamPlayerRankToggle?.addEventListener("change", (event) => {
     renderToggleState(showFireteamPlayerRankToggle, fireteamPlayerLabel, event.target.checked);
+    saveToggle("showFireteamPlayerRank", event.target.checked);
   });
 
   showFireteamPointsToggle?.addEventListener("change", (event) => {
     renderToggleState(showFireteamPointsToggle, fireteamPointsLabel, event.target.checked);
+    saveToggle("showFireteamPoints", event.target.checked);
   });
 
   showFireteamPlayerPointsToggle?.addEventListener("change", (event) => {
     renderToggleState(showFireteamPlayerPointsToggle, fireteamPlayerPointsLabel, event.target.checked);
+    saveToggle("showFireteamPlayerPoints", event.target.checked);
   });
 
   showFireteamPlayerXpToggle?.addEventListener("change", (event) => {
     renderToggleState(showFireteamPlayerXpToggle, fireteamXpLabel, event.target.checked);
+    saveToggle("showFireteamPlayerXp", event.target.checked);
   });
 
-  saveButton?.addEventListener("click", async () => {
-    await chrome.storage.local.set({
-      showNextPatent: showNextPatentToggle?.checked ?? false,
-      showExperienceRanking: showExperienceRankingToggle?.checked ?? false,
-      showFireteamClanRank: showFireteamClanRankToggle?.checked ?? false,
-      showFireteamPlayerRank: showFireteamPlayerRankToggle?.checked ?? false,
-      showFireteamPoints: showFireteamPointsToggle?.checked ?? false,
-      showFireteamPlayerPoints: showFireteamPlayerPointsToggle?.checked ?? false,
-      showFireteamPlayerXp: showFireteamPlayerXpToggle?.checked ?? false,
-      rankingInterval: Number(rankingIntervalSelect?.value ?? 600000),
-    });
+  rankingIntervalSelect?.addEventListener("change", (event) => {
+    saveSelect("rankingInterval", event.target.value);
+  });
 
-    const activeTab = activeTabs[0];
-
-    if (activeTab?.id) {
-      await chrome.tabs.reload(activeTab.id);
+  window.addEventListener("unload", () => {
+    if (settingsChanged) {
+      const activeTab = activeTabs[0];
+      if (activeTab?.id) {
+        chrome.tabs.reload(activeTab.id);
+      }
     }
-
-    window.close();
   });
 });

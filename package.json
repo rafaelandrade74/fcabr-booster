@@ -1,6 +1,6 @@
 {
   "name": "fcabr-booster",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "Extensao para enriquecer a experiencia do usuario no site FCABR.",
   "scripts": {
