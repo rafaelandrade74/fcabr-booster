@@ -44,6 +44,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const fireteamPlayerLabel = document.querySelector("[data-fireteam-player-label]");
   const showFireteamPointsToggle = document.querySelector("#show-fireteam-points");
   const fireteamPointsLabel = document.querySelector("[data-fireteam-points-label]");
+  const showFireteamPlayerPointsToggle = document.querySelector("#show-fireteam-player-points");
+  const fireteamPlayerPointsLabel = document.querySelector("[data-fireteam-player-points-label]");
   const showFireteamPlayerXpToggle = document.querySelector("#show-fireteam-player-xp");
   const fireteamXpLabel = document.querySelector("[data-fireteam-xp-label]");
   const saveButton = document.querySelector("#save-settings");
@@ -66,6 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderToggleState(showFireteamClanRankToggle, fireteamClanLabel, Boolean(storedSettings.showFireteamClanRank));
   renderToggleState(showFireteamPlayerRankToggle, fireteamPlayerLabel, Boolean(storedSettings.showFireteamPlayerRank));
   renderToggleState(showFireteamPointsToggle, fireteamPointsLabel, Boolean(storedSettings.showFireteamPoints));
+  renderToggleState(showFireteamPlayerPointsToggle, fireteamPlayerPointsLabel, Boolean(storedSettings.showFireteamPlayerPoints));
   renderToggleState(showFireteamPlayerXpToggle, fireteamXpLabel, Boolean(storedSettings.showFireteamPlayerXp));
 
   if (rankingIntervalSelect) {
@@ -100,6 +103,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderToggleState(showFireteamPointsToggle, fireteamPointsLabel, event.target.checked);
   });
 
+  showFireteamPlayerPointsToggle?.addEventListener("change", (event) => {
+    renderToggleState(showFireteamPlayerPointsToggle, fireteamPlayerPointsLabel, event.target.checked);
+  });
+
   showFireteamPlayerXpToggle?.addEventListener("change", (event) => {
     renderToggleState(showFireteamPlayerXpToggle, fireteamXpLabel, event.target.checked);
   });
@@ -111,6 +118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       showFireteamClanRank: showFireteamClanRankToggle?.checked ?? false,
       showFireteamPlayerRank: showFireteamPlayerRankToggle?.checked ?? false,
       showFireteamPoints: showFireteamPointsToggle?.checked ?? false,
+      showFireteamPlayerPoints: showFireteamPlayerPointsToggle?.checked ?? false,
       showFireteamPlayerXp: showFireteamPlayerXpToggle?.checked ?? false,
       rankingInterval: Number(rankingIntervalSelect?.value ?? 600000),
     });
