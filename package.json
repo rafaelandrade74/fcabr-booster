@@ -5,9 +5,11 @@
   "description": "Extensao para enriquecer a experiencia do usuario no site FCABR.",
   "scripts": {
     "build": "webpack --mode production",
-    "dev": "webpack --mode production --watch"
+    "dev": "webpack --mode production --watch",
+    "release": "webpack --mode production && node scripts/release.js"
   },
   "devDependencies": {
+    "archiver": "^6.0.2",
     "copy-webpack-plugin": "^12.0.2",
     "html-webpack-plugin": "^5.6.0",
     "webpack": "^5.97.1",
