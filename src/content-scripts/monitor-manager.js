@@ -129,7 +129,7 @@
                 oidUser: player.oidUser,
                 rank: player.rank,
                 pointTotal: player.pointTotal ?? player.points ?? 0,
-                xp: player.xp ?? player.experience ?? player.experiencePoints ?? 0
+                xp: player.expTotal ?? 0
             });
         }
     }

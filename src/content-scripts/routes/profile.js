@@ -166,14 +166,19 @@ export async function profilePage() {
         const playerData = StorageService.get(`${RouteKeys.FireteamClanPlayer}-${oidUser}`);
 
         if (clanData || playerData) {
-            FireteamCard.render(cardElement, translations, {
+            const allCards = ExperienceCard.findAllCardElements(translations, tipoPagina);
+            const targets = allCards.length > 0 ? allCards : [cardElement];
+            const renderOptions = {
                 showClanRank: Boolean(storedSettings.showFireteamClanRank),
                 showPlayerRank: Boolean(storedSettings.showFireteamPlayerRank),
                 showPoints: Boolean(storedSettings.showFireteamPoints),
                 showPlayerXp: Boolean(storedSettings.showFireteamPlayerXp),
                 clanData,
                 playerData
-            });
+            };
+            for (const target of targets) {
+                FireteamCard.render(target, translations, renderOptions);
+            }
         }
     }
 

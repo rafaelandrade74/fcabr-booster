@@ -11,7 +11,7 @@ export default class FireteamCard {
             (showPoints && clanData?.pointTotal) ||
             (showPlayerXp && playerData?.xp);
 
-        const existing = document.querySelector(`[${CONTAINER_ATTR}]`);
+        const existing = anchor.parentElement?.querySelector(`[${CONTAINER_ATTR}]`) ?? null;
 
         if (!hasContent) {
             existing?.remove();
@@ -44,7 +44,7 @@ export default class FireteamCard {
         header.appendChild(createTrophyIcon());
 
         const title = document.createElement("span");
-        title.style.cssText = "font-size:13px;font-weight:700;color:#f0b429;letter-spacing:0.02em";
+        title.style.cssText = "font-size:14px;font-weight:700;color:#f0b429;letter-spacing:0.02em";
         title.textContent = "Fireteam";
         header.appendChild(title);
         container.appendChild(header);
@@ -85,11 +85,11 @@ function createRow(label, value) {
     row.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0";
 
     const labelEl = document.createElement("span");
-    labelEl.style.cssText = "font-size:12px;color:rgba(255,255,255,0.5);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0";
+    labelEl.style.cssText = "font-size:13px;color:rgba(255,255,255,0.5);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0";
     labelEl.textContent = label;
 
     const valueEl = document.createElement("span");
-    valueEl.style.cssText = "font-size:13px;font-weight:700;color:#f0b429;white-space:nowrap;flex-shrink:0";
+    valueEl.style.cssText = "font-size:14px;font-weight:700;color:#f0b429;white-space:nowrap;flex-shrink:0";
     valueEl.textContent = value;
 
     row.appendChild(labelEl);

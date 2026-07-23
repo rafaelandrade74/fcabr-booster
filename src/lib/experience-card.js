@@ -28,6 +28,28 @@ export default class ExperienceCard {
     }
 
     /**
+     * Retorna todos os cards de XP no DOM (mobile + desktop do Next.js).
+     * @param {Translations} translations
+     * @param {string} tipoPagina
+     * @returns {HTMLElement[]}
+     */
+    static findAllCardElements(translations, tipoPagina) {
+        if (tipoPagina === "PF") {
+            return DOM.$$("span")
+                .filter(el => el.textContent.trim() === translations.Profile["xp-label"])
+                .map(el => el.closest("div.rounded-lg"))
+                .filter(Boolean);
+        }
+        if (tipoPagina === "PFP") {
+            return DOM.$$("div.inline-flex.rounded.border > button")
+                .filter(el => el.textContent.trim() === translations.Profile["xp-label-btn"])
+                .map(el => el.closest("div.rounded-lg"))
+                .filter(Boolean);
+        }
+        return [];
+    }
+
+    /**
      * @param {Translations} translations
      * @returns {HTMLElement | null}
      */
@@ -166,7 +188,7 @@ export default class ExperienceCard {
             "border:1px solid rgba(240,180,41,.3)",
             "border-radius:5px",
             "padding:3px 9px",
-            "font-size:11px",
+            "font-size:13px",
             "font-weight:700",
             "color:#f0b429",
             "white-space:nowrap",
