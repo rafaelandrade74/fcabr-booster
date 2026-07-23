@@ -182,17 +182,18 @@ export default class ExperienceCard {
      * @param {() => SVGSVGElement} createIconFn
      */
     _renderBadge(rank, attrName, labelText, createIconFn) {
-        if (!rank) return;
+        if (rank === undefined || rank === null) return;
 
         const container = this._getBadgeContainer();
         if (!container) return;
 
+        const displayText = rank > 0 ? `${labelText} #${rank}` : `${labelText} +1000`;
         const numAttr = `${attrName}-num`;
         let badge = container.querySelector(`[${attrName}]`);
 
         if (badge) {
             const numEl = badge.querySelector(`[${numAttr}]`);
-            if (numEl) numEl.textContent = `${labelText} #${rank}`;
+            if (numEl) numEl.textContent = displayText;
             return;
         }
 
@@ -218,7 +219,7 @@ export default class ExperienceCard {
 
         const num = document.createElement("span");
         num.setAttribute(numAttr, "");
-        num.textContent = `${labelText} #${rank}`;
+        num.textContent = displayText;
         badge.appendChild(num);
 
         container.appendChild(badge);

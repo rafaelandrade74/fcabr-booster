@@ -52,18 +52,31 @@ window.addEventListener("message", async event => {
     if (!route)
         return;
 
-    let storageKey = route.storageKey(event.data.data);
-    
+    const storageKey = route.storageKey(event.data.data);
+
     if (!storageKey)
         return;
 
-    StorageService.set(storageKey, event.data.data);
+    const keys = Array.isArray(storageKey) ? storageKey : [storageKey];
+    for (const key of keys) {
+        StorageService.set(key, event.data.data);
+    }
 
     // renderizar a página novamente para atualizar os dados exibidos
     renderPage();
 });
 
 let lastUrl = location.href;
+
+// Intercepta localStorage.setItem para detectar troca de perfil sem cachear o ID em memória
+const _origSetItem = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function(key, value) {
+    _origSetItem(key, value);
+    if (key.startsWith("selected-profile-")) {
+        renderPage();
+    }
+};
+
 // atualizar os componentes da página quando a url mudar (navegação SPA)
 window.addEventListener("DOMContentLoaded", () => {
 

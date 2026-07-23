@@ -29,18 +29,17 @@ function getProfilePageType(pathname = window.location.pathname) {
 
 /**
  * @param {object}
- * @returns {string}
+ * @returns {string|string[]}
  */
 export function storageKeyGoaRankStatus(data) {
-    const profileValue = getProfileId();
-
     const oidUser = data.data.oidUser;
     const nickname = data.data.nickname;
-    const result = oidUser === profileValue
-        ? RouteKeyProfile(oidUser)
-        : RouteKeyProfile(nickname);
 
-    return result;
+    const keyByOid = RouteKeyProfile(oidUser);
+    const keyByNickname = RouteKeyProfile(nickname);
+
+    // Salva sob as duas chaves: oidUser (lookup PFP) e nickname (lookup PF)
+    return keyByOid === keyByNickname ? keyByOid : [keyByOid, keyByNickname];
 }
 /**
  * 
@@ -77,7 +76,7 @@ function RouteKeyProfile(name = null) {
     return `${RouteKeys.GoaRankStatus}-${name}`;
 }
 
-export async function profilePage() {
+export async function profilePage() {    
     const currentPath = `${window.location.pathname}${window.location.search}`;
     const mathUrl = getProfilePageType(currentPath);
 
@@ -153,6 +152,8 @@ export async function profilePage() {
             const rankData = StorageService.get(`${RouteKeys.ExperienceRankingPosition}-${data.data.oidUser}`);
             if (rankData?.rank) {
                 card.setRankingBadge(rankData.rank);
+            } else if (storedSettings.showExperienceRanking) {
+                card.setRankingBadge(0);
             }
         }
     }
@@ -166,21 +167,19 @@ export async function profilePage() {
             : null;
         const playerData = StorageService.get(`${RouteKeys.FireteamClanPlayer}-${oidUser}`);
 
-        if (clanData || playerData) {
-            const allCards = ExperienceCard.findAllCardElements(translations, tipoPagina);
-            const targets = allCards.length > 0 ? allCards : [cardElement];
-            const renderOptions = {
-                showClanRank: Boolean(storedSettings.showFireteamClanRank),
-                showPlayerRank: Boolean(storedSettings.showFireteamPlayerRank),
-                showPoints: Boolean(storedSettings.showFireteamPoints),
-                showPlayerPoints: Boolean(storedSettings.showFireteamPlayerPoints),
-                showPlayerXp: Boolean(storedSettings.showFireteamPlayerXp),
-                clanData,
-                playerData
-            };
-            for (const target of targets) {
-                FireteamCard.render(target, translations, renderOptions);
-            }
+        const allCards = ExperienceCard.findAllCardElements(translations, tipoPagina);
+        const targets = allCards.length > 0 ? allCards : [cardElement];
+        const renderOptions = {
+            showClanRank: Boolean(storedSettings.showFireteamClanRank),
+            showPlayerRank: Boolean(storedSettings.showFireteamPlayerRank),
+            showPoints: Boolean(storedSettings.showFireteamPoints),
+            showPlayerPoints: Boolean(storedSettings.showFireteamPlayerPoints),
+            showPlayerXp: Boolean(storedSettings.showFireteamPlayerXp),
+            clanData,
+            playerData
+        };
+        for (const target of targets) {
+            FireteamCard.render(target, translations, renderOptions);
         }
     }
 

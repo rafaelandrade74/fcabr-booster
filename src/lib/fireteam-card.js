@@ -5,17 +5,8 @@ export default class FireteamCard {
     static render(anchor, translations, options) {
         const { showClanRank, showPlayerRank, showPoints, showPlayerPoints, showPlayerXp, clanData, playerData } = options;
 
-        const hasClanContent = Boolean(clanData) && (
-            (showClanRank && clanData.rank) ||
-            (showPoints && clanData.pointTotal)
-        );
-
-        const hasPlayerContent = Boolean(playerData) && (
-            (showPlayerRank && playerData.rank) ||
-            (showPlayerPoints && playerData.pointTotal) ||
-            (showPlayerXp && playerData.xp)
-        );
-
+        const hasClanContent = showClanRank || showPoints;
+        const hasPlayerContent = showPlayerRank || showPlayerPoints || showPlayerXp;
         const hasContent = hasClanContent || hasPlayerContent;
 
         const existing = anchor.parentElement?.querySelector(`[${CONTAINER_ATTR}]`) ?? null;
@@ -71,13 +62,15 @@ export default class FireteamCard {
         if (hasClanContent) {
             const card = createSubCard(isEn ? "Clan" : "Clã", createShieldIcon());
 
-            if (showClanRank && clanData?.rank) {
+            if (showClanRank) {
                 const label = t["fireteam-clan-rank-label"] || (isEn ? "Rank" : "Posição");
-                card.appendChild(createStatRow(label, `#${clanData.rank}`));
+                const value = clanData?.rank ? `#${clanData.rank}` : "0";
+                card.appendChild(createStatRow(label, value));
             }
-            if (showPoints && clanData?.pointTotal) {
+            if (showPoints) {
                 const label = t["fireteam-points-label"] || (isEn ? "Points" : "Pontos");
-                card.appendChild(createStatRow(label, Number(clanData.pointTotal).toLocaleString(locale)));
+                const value = clanData?.pointTotal ? Number(clanData.pointTotal).toLocaleString(locale) : "0";
+                card.appendChild(createStatRow(label, value));
             }
 
             grid.appendChild(card);
@@ -86,17 +79,20 @@ export default class FireteamCard {
         if (hasPlayerContent) {
             const card = createSubCard(isEn ? "Player" : "Jogador", createUserIcon());
 
-            if (showPlayerRank && playerData?.rank) {
+            if (showPlayerRank) {
                 const label = t["fireteam-player-rank-label"] || (isEn ? "Rank" : "Posição");
-                card.appendChild(createStatRow(label, `#${playerData.rank}`));
+                const value = playerData?.rank ? `#${playerData.rank}` : "0";
+                card.appendChild(createStatRow(label, value));
             }
-            if (showPlayerPoints && playerData?.pointTotal) {
+            if (showPlayerPoints) {
                 const label = t["fireteam-player-points-label"] || (isEn ? "Points" : "Pontos");
-                card.appendChild(createStatRow(label, Number(playerData.pointTotal).toLocaleString(locale)));
+                const value = playerData?.pointTotal ? Number(playerData.pointTotal).toLocaleString(locale) : "0";
+                card.appendChild(createStatRow(label, value));
             }
-            if (showPlayerXp && playerData?.xp) {
+            if (showPlayerXp) {
                 const label = t["fireteam-player-xp-label"] || "XP";
-                card.appendChild(createStatRow(label, Number(playerData.xp).toLocaleString(locale)));
+                const value = playerData?.xp ? Number(playerData.xp).toLocaleString(locale) : "0";
+                card.appendChild(createStatRow(label, value));
             }
 
             grid.appendChild(card);
