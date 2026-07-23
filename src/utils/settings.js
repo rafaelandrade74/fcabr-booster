@@ -7,5 +7,6 @@ export const DEFAULT_SETTINGS = {
   showFireteamPlayerRank: false,
   showFireteamPoints: false,
   showFireteamPlayerXp: false,
+  showFireteamPlayerPoints: false,
   rankingInterval: 600000
 };

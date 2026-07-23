@@ -119,6 +119,7 @@ export async function profilePage() {
         storedSettings.showFireteamClanRank ||
         storedSettings.showFireteamPlayerRank ||
         storedSettings.showFireteamPoints ||
+        storedSettings.showFireteamPlayerPoints ||
         storedSettings.showFireteamPlayerXp
     );
 
@@ -172,6 +173,7 @@ export async function profilePage() {
                 showClanRank: Boolean(storedSettings.showFireteamClanRank),
                 showPlayerRank: Boolean(storedSettings.showFireteamPlayerRank),
                 showPoints: Boolean(storedSettings.showFireteamPoints),
+                showPlayerPoints: Boolean(storedSettings.showFireteamPlayerPoints),
                 showPlayerXp: Boolean(storedSettings.showFireteamPlayerXp),
                 clanData,
                 playerData
