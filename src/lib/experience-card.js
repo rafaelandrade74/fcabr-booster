@@ -133,23 +133,26 @@ export default class ExperienceCard {
 
     /** @returns {HTMLElement | null} */
     _getBadgeContainer() {
-        const header = this.getHeader();
-        if (!header) return null;
+        if (!this.card) return null;
 
         const ATTR = "data-fcabr-badge-container";
-        let container = header.querySelector(`[${ATTR}]`);
+        let container = this.card.querySelector(`[${ATTR}]`);
 
         if (!container) {
             container = document.createElement("div");
             container.setAttribute(ATTR, "");
             container.style.cssText = [
-                "display:inline-flex",
+                "display:flex",
                 "align-items:center",
                 "gap:6px",
-                "margin-left:auto",
-                "flex-shrink:0",
+                "padding-top:8px",
             ].join(";");
-            header.appendChild(container);
+            const footer = this.getFooter();
+            if (footer) {
+                footer.insertAdjacentElement("afterend", container);
+            } else {
+                this.card.appendChild(container);
+            }
         }
 
         return container;
