@@ -148,9 +148,8 @@ export default class ExperienceCard {
                 "margin-top:4px",
             ].join(";");
 
-            // Insere após o nome do player (elemento antes dos botões de tab)
-            const tabEl = this.card.querySelector("div.inline-flex.rounded.border");
-            const nameEl = tabEl?.previousElementSibling ?? null;
+            // Insere após o div do nome do player (text-4xl)
+            const nameEl = this.card.querySelector('[class*="text-4xl"]');
             if (nameEl) {
                 nameEl.insertAdjacentElement("afterend", container);
             } else {
