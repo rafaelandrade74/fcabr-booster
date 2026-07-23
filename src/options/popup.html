@@ -60,21 +60,6 @@
             </label>
           </div>
 
-          <div class="setting-row">
-            <div class="setting-copy">
-              <p class="setting-title">Intervalo de atualização</p>
-              <p class="setting-help">Com qual frequência verificar o ranking.</p>
-            </div>
-
-            <select id="ranking-interval" class="select" aria-label="Intervalo de atualização do ranking">
-              <option value="60000">1 min</option>
-              <option value="300000">5 min</option>
-              <option value="600000">10 min</option>
-              <option value="900000">15 min</option>
-              <option value="1200000">20 min</option>
-              <option value="1800000">30 min</option>
-            </select>
-          </div>
         </section>
 
         <section class="panel" aria-labelledby="fireteam-ranking-title">
@@ -129,11 +114,29 @@
 
           <div class="setting-row">
             <div class="setting-copy">
-              <p class="setting-title">Intervalo de atualização</p>
-              <p class="setting-help">Com qual frequência verificar o ranking.</p>
+              <p class="setting-title">Mostrar XP obtido no Fireteam</p>
+              <p class="setting-help">Exibe a experiência acumulada pelo jogador nas partidas de fireteam.</p>
             </div>
 
-            <select id="fireteam-ranking-interval" class="select" aria-label="Intervalo de atualização do ranking fireteam">
+            <label class="switch" for="show-fireteam-player-xp">
+              <input id="show-fireteam-player-xp" type="checkbox" />
+              <span class="switch-track" aria-hidden="true">
+                <span class="switch-thumb"></span>
+              </span>
+              <span class="switch-label" data-fireteam-xp-label>Ativado</span>
+            </label>
+          </div>
+
+        </section>
+
+        <section class="panel">
+          <div class="setting-row">
+            <div class="setting-copy">
+              <p class="setting-title">Intervalo de atualização</p>
+              <p class="setting-help">Frequência de consulta para todos os rankings.</p>
+            </div>
+
+            <select id="ranking-interval" class="select" aria-label="Intervalo de atualização">
               <option value="600000">10 min</option>
               <option value="1200000">20 min</option>
               <option value="1800000">30 min</option>

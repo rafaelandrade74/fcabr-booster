@@ -3,12 +3,13 @@ const CONTAINER_ATTR = "data-fcabr-fireteam-card";
 export default class FireteamCard {
 
     static render(anchor, translations, options) {
-        const { showClanRank, showPlayerRank, showPoints, clanData, playerData } = options;
+        const { showClanRank, showPlayerRank, showPoints, showPlayerXp, clanData, playerData } = options;
 
         const hasContent =
             (showClanRank && clanData?.rank) ||
             (showPlayerRank && playerData?.rank) ||
-            (showPoints && clanData?.pointTotal);
+            (showPoints && clanData?.pointTotal) ||
+            (showPlayerXp && playerData?.xp);
 
         const existing = document.querySelector(`[${CONTAINER_ATTR}]`);
 
@@ -35,7 +36,7 @@ export default class FireteamCard {
         return container;
     }
 
-    static _populate(container, translations, { showClanRank, showPlayerRank, showPoints, clanData, playerData }) {
+    static _populate(container, translations, { showClanRank, showPlayerRank, showPoints, showPlayerXp, clanData, playerData }) {
         container.innerHTML = "";
 
         const header = document.createElement("div");
@@ -65,6 +66,13 @@ export default class FireteamCard {
             const label = translations?.Profile?.["fireteam-points-label"] || "Pontuação";
             const locale = translations?.lang === "en" ? "en-US" : "pt-BR";
             const value = Number(clanData.pointTotal).toLocaleString(locale);
+            stats.appendChild(createRow(label, value));
+        }
+
+        if (showPlayerXp && playerData?.xp) {
+            const label = translations?.Profile?.["fireteam-player-xp-label"] || "XP Fireteam";
+            const locale = translations?.lang === "en" ? "en-US" : "pt-BR";
+            const value = Number(playerData.xp).toLocaleString(locale);
             stats.appendChild(createRow(label, value));
         }
 

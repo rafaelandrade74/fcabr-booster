@@ -3,7 +3,7 @@ import { profilePage } from "./routes/profile.js";
 import StorageService from "../lib/storage-service.js";
 import { RouteKeys } from "../data/routekeys.js";
 import { initializeStoredValues } from "../utils/index.js";
-import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS, MIN_FIRETEAM_INTERVAL_MS } from "../utils/settings.js";
+import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS } from "../utils/settings.js";
 
 const script = document.createElement("script");
 
@@ -13,15 +13,17 @@ script.onload = () => script.remove();
 (document.head || document.documentElement).appendChild(script);
 
 initializeStoredValues(DEFAULT_SETTINGS).then(settings => {
-    const isFireteamEnabled = settings.showFireteamClanRank || settings.showFireteamPlayerRank || settings.showFireteamPoints;
+    const isFireteamEnabled = settings.showFireteamClanRank || settings.showFireteamPlayerRank || settings.showFireteamPoints || settings.showFireteamPlayerXp;
     if (!settings.showExperienceRanking && !isFireteamEnabled) return;
+
+    const intervalMs = Math.max(MIN_RANKING_INTERVAL_MS, Number(settings.rankingInterval));
 
     const managerScript = document.createElement("script");
     managerScript.src = chrome.runtime.getURL("scripts/content-scripts/monitor-manager.js");
     managerScript.dataset.experienceRankingEnabled = settings.showExperienceRanking ? "1" : "0";
-    managerScript.dataset.experienceRankingInterval = Math.max(MIN_RANKING_INTERVAL_MS, Number(settings.experienceRankingInterval));
+    managerScript.dataset.experienceRankingInterval = intervalMs;
     managerScript.dataset.fireteamRankingEnabled = isFireteamEnabled ? "1" : "0";
-    managerScript.dataset.fireteamRankingInterval = Math.max(MIN_FIRETEAM_INTERVAL_MS, Number(settings.fireteamRankingInterval));
+    managerScript.dataset.fireteamRankingInterval = intervalMs;
     managerScript.onload = () => managerScript.remove();
     (document.head || document.documentElement).appendChild(managerScript);
 });

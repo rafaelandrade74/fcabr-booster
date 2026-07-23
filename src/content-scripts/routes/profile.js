@@ -118,7 +118,8 @@ export async function profilePage() {
     const shouldShowAnyFireteam = isOwnProfile && (
         storedSettings.showFireteamClanRank ||
         storedSettings.showFireteamPlayerRank ||
-        storedSettings.showFireteamPoints
+        storedSettings.showFireteamPoints ||
+        storedSettings.showFireteamPlayerXp
     );
 
     if (!shouldShowNextPatent && !shouldShowAnyFireteam) return;
@@ -169,6 +170,7 @@ export async function profilePage() {
                 showClanRank: Boolean(storedSettings.showFireteamClanRank),
                 showPlayerRank: Boolean(storedSettings.showFireteamPlayerRank),
                 showPoints: Boolean(storedSettings.showFireteamPoints),
+                showPlayerXp: Boolean(storedSettings.showFireteamPlayerXp),
                 clanData,
                 playerData
             });

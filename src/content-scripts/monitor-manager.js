@@ -45,7 +45,7 @@
     // ---- ExperienceRankingMonitor ----
 
     class ExperienceRankingMonitor extends BaseMonitor {
-        static MIN_INTERVAL_MS = 60000;
+        static MIN_INTERVAL_MS = 600000;
 
         static SYNTHETIC_URL = "fcabr://ranking/experience-position";
         static API_URL = "https://fcabr.net/api/ranking/player?tab=experience&page=1&pageSize=1000&hideBannedUsers=0";
@@ -128,7 +128,8 @@
             postExtensionMessage(FireteamRankingMonitor.URL_CLAN_PLAYER, {
                 oidUser: player.oidUser,
                 rank: player.rank,
-                pointTotal: player.pointTotal ?? player.points ?? 0
+                pointTotal: player.pointTotal ?? player.points ?? 0,
+                xp: player.xp ?? player.experience ?? player.experiencePoints ?? 0
             });
         }
     }
