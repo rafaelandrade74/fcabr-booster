@@ -151,11 +151,10 @@ export default class ExperienceCard {
             ].join(";");
 
             const nameEl = outerCard?.querySelector('[class*="text-4xl"]') ?? null;
-            if (nameEl?.parentElement) {
-                // Coloca o badge inline com o nome tornando o wrapper flex
-                const nameWrapper = nameEl.parentElement;
-                nameWrapper.style.cssText = "display:flex;align-items:center;gap:8px;flex-wrap:wrap";
-                nameWrapper.appendChild(container);
+            // flexRow = div.flex.items-center.gap-3 (patente + nome + badge)
+            const flexRow = nameEl?.parentElement?.parentElement ?? null;
+            if (flexRow) {
+                flexRow.appendChild(container);
             } else {
                 this.card.appendChild(container);
             }
