@@ -76,6 +76,7 @@
 
         static SYNTHETIC_URL_CLAN = "fcabr://ranking/fireteam/clan";
         static SYNTHETIC_URL_PLAYER = "fcabr://ranking/fireteam/player";
+        static SYNTHETIC_URL_META = "fcabr://ranking/fireteam/meta";
         static PROFILE_API_URL = "https://fcabr.net/api/profile?userId=";
         static RANKING_API_URL = "https://fcabr.net/api/ranking/clan/fireteam?page=1&size=1000&ranking=pointTotal";
 
@@ -93,6 +94,11 @@
             const clans = Array.isArray(body?.data) ? body.data : [];
             const clan = clans.find(c => c.oidGuild === oidGuild);
             if (!clan) return;
+
+            postExtensionMessage(FireteamRankingMonitor.SYNTHETIC_URL_META, {
+                oidUser,
+                oidGuild: clan.oidGuild
+            });
 
             postExtensionMessage(FireteamRankingMonitor.SYNTHETIC_URL_CLAN, {
                 oidGuild: clan.oidGuild,

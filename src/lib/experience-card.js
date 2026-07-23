@@ -109,27 +109,55 @@ export default class ExperienceCard {
         return tabEl?.parentElement || null;
     }
 
+    /** @returns {HTMLElement | null} */
+    _getBadgeContainer() {
+        const header = this.getHeader();
+        if (!header) return null;
+
+        const ATTR = "data-fcabr-badge-container";
+        let container = header.querySelector(`[${ATTR}]`);
+
+        if (!container) {
+            container = document.createElement("div");
+            container.setAttribute(ATTR, "");
+            container.style.cssText = [
+                "display:inline-flex",
+                "align-items:center",
+                "gap:6px",
+                "margin-left:auto",
+                "flex-shrink:0",
+            ].join(";");
+            header.appendChild(container);
+        }
+
+        return container;
+    }
+
     /**
-     * Injeta ou atualiza o badge "Top #N" no header do card.
+     * Injeta ou atualiza um badge no container do header.
      * Idempotente: chamadas subsequentes apenas atualizam o número.
      * @param {number} rank
+     * @param {string} attrName
+     * @param {string} labelText
+     * @param {() => SVGSVGElement} createIconFn
      */
-    setRankingBadge(rank) {
+    _renderBadge(rank, attrName, labelText, createIconFn) {
         if (!rank) return;
-        const header = this.getHeader();
-        if (!header) return;
 
-        const ATTR = "data-fcabr-rank-badge";
-        let badge = header.querySelector(`[${ATTR}]`);
+        const container = this._getBadgeContainer();
+        if (!container) return;
+
+        const numAttr = `${attrName}-num`;
+        let badge = container.querySelector(`[${attrName}]`);
 
         if (badge) {
-            const numEl = badge.querySelector("[data-fcabr-rank-num]");
-            if (numEl) numEl.textContent = `Top #${rank}`;
+            const numEl = badge.querySelector(`[${numAttr}]`);
+            if (numEl) numEl.textContent = `${labelText} #${rank}`;
             return;
         }
 
         badge = document.createElement("div");
-        badge.setAttribute(ATTR, "");
+        badge.setAttribute(attrName, "");
         badge.style.cssText = [
             "display:inline-flex",
             "align-items:center",
@@ -144,17 +172,42 @@ export default class ExperienceCard {
             "white-space:nowrap",
             "flex-shrink:0",
             "line-height:1.4",
-            "margin-left:auto",
         ].join(";");
 
-        badge.appendChild(createTrophyIcon());
+        badge.appendChild(createIconFn());
 
         const num = document.createElement("span");
-        num.setAttribute("data-fcabr-rank-num", "");
-        num.textContent = `Top #${rank}`;
+        num.setAttribute(numAttr, "");
+        num.textContent = `${labelText} #${rank}`;
         badge.appendChild(num);
 
-        header.appendChild(badge);
+        container.appendChild(badge);
+    }
+
+    /**
+     * Injeta ou atualiza o badge "Top #N" (Ranking de Experiência).
+     * @param {number} rank
+     */
+    setRankingBadge(rank) {
+        this._renderBadge(rank, "data-fcabr-rank-badge", "Top", createTrophyIcon);
+    }
+
+    /**
+     * Injeta ou atualiza o badge do clã no Ranking Semanal Fireteam.
+     * @param {number} rank
+     */
+    setFireteamClanBadge(rank) {
+        const label = this.translations?.Profile?.["fireteam-clan-badge-label"] || "Clã";
+        this._renderBadge(rank, "data-fcabr-fireteam-clan-badge", label, createShieldIcon);
+    }
+
+    /**
+     * Injeta ou atualiza o badge do jogador no Ranking Semanal Fireteam.
+     * @param {number} rank
+     */
+    setFireteamPlayerBadge(rank) {
+        const label = this.translations?.Profile?.["fireteam-player-badge-label"] || "Fireteam";
+        this._renderBadge(rank, "data-fcabr-fireteam-player-badge", label, createUsersIcon);
     }
 
     /** @returns {HTMLElement | null} */
@@ -205,6 +258,60 @@ function createTrophyIcon() {
         path.setAttribute("d", d);
         svg.appendChild(path);
     });
+
+    return svg;
+}
+
+/** @returns {SVGSVGElement} */
+function createShieldIcon() {
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("width", "11");
+    svg.setAttribute("height", "11");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2.5");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.style.flexShrink = "0";
+
+    const path = document.createElementNS(NS, "path");
+    path.setAttribute("d", "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z");
+    svg.appendChild(path);
+
+    return svg;
+}
+
+/** @returns {SVGSVGElement} */
+function createUsersIcon() {
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("width", "11");
+    svg.setAttribute("height", "11");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2.5");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.style.flexShrink = "0";
+
+    [
+        "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2",
+        "M23 21v-2a4 4 0 0 0-3-3.87",
+        "M16 3.13a4 4 0 0 1 0 7.75",
+    ].forEach(d => {
+        const path = document.createElementNS(NS, "path");
+        path.setAttribute("d", d);
+        svg.appendChild(path);
+    });
+
+    const circle = document.createElementNS(NS, "circle");
+    circle.setAttribute("cx", "9");
+    circle.setAttribute("cy", "7");
+    circle.setAttribute("r", "4");
+    svg.appendChild(circle);
 
     return svg;
 }

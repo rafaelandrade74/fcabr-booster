@@ -14,3 +14,8 @@ export function storageKeyClanFireteamRanking(data) {
     if (!data?.oidGuild) return null;
     return `${RouteKeys.ClanFireteamRanking}-${data.oidGuild}`;
 }
+
+export function storageKeyFireteamUserMeta(data) {
+    if (!data?.oidUser) return null;
+    return `${RouteKeys.FireteamUserMeta}-${data.oidUser}`;
+}

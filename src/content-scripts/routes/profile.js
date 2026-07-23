@@ -145,9 +145,24 @@ export async function profilePage() {
     card.setProgress(currentExperiencePoints, baseExperiencePoints, nextExperiencePoints);
 
     if (tipoPagina === "PFP") {
-        const rankData = StorageService.get(`${RouteKeys.ExperienceRankingPosition}-${data.data.oidUser}`);
+        const oidUser = data.data.oidUser;
+
+        const rankData = StorageService.get(`${RouteKeys.ExperienceRankingPosition}-${oidUser}`);
         if (rankData?.rank) {
             card.setRankingBadge(rankData.rank);
+        }
+
+        const fireteamMeta = StorageService.get(`${RouteKeys.FireteamUserMeta}-${oidUser}`);
+        if (fireteamMeta?.oidGuild) {
+            const clanRankData = StorageService.get(`${RouteKeys.ClanFireteamRanking}-${fireteamMeta.oidGuild}`);
+            if (clanRankData?.rank) {
+                card.setFireteamClanBadge(clanRankData.rank);
+            }
+        }
+
+        const playerFireteamData = StorageService.get(`${RouteKeys.PlayerFireteamRanking}-${oidUser}`);
+        if (playerFireteamData?.rank) {
+            card.setFireteamPlayerBadge(playerFireteamData.rank);
         }
     }
 
