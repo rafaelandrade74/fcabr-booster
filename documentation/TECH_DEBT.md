@@ -12,21 +12,29 @@ Criado `src/data/api-route-keys.js` com `storageKeyGoaRankStatus` e `RouteKeyPro
 
 ---
 
-#### TD-002: Cache Volátil — Dados Perdidos ao Recarregar
+#### TD-002: Cache Volátil — Dados de XP/Patente Perdidos ao Recarregar
 
 **Arquivo:** `src/lib/storage-service.js`
 
-**Problema:** O `StorageService` usa um `Map` em memória. Se o usuário acessa `/pt/profile/jogador` diretamente (digitando a URL), a API é chamada pelo site, mas a resposta pode chegar antes que o listener esteja pronto, ou o cache pode estar vazio.
+**Problema:** O `StorageService` usa um `Map` em memória — os dados são perdidos a cada reload ou navegação direta para a URL. O cache só é populado quando `inject.js` intercepta a resposta de uma chamada `fetch` da própria página.
 
-Na prática, o fluxo é: página carrega → API é chamada → resposta interceptada → cache populado → página renderizada. Mas há uma race condition sutil:
+**Race condition no boot:**
+- Página carrega → site faz a chamada `GET /api/goa-rank-status` → `inject.js` intercepta → `postMessage` → `content.js` grava no cache → `renderPage()`
+- Se `renderPage()` rodar antes da resposta da API (DOMContentLoaded rápido + API lenta), o cartão não é renderizado na primeira tentativa
+- Quando a API responde, `renderPage()` é chamado novamente — **normalmente resolve**
+- Exceção: se o DOM do cartão de XP for destruído e recriado pelo React entre as duas tentativas, o `waitUntil` da segunda rodada pode selecionar o elemento errado ou falhar no timeout
 
-- Se `DOMContentLoaded` dispara antes da resposta da API, `renderPage()` roda com cache vazio.
-- Quando a API responde, `renderPage()` é chamado novamente — isso funciona.
-- Mas se o DOM do cartão de XP já foi renderizado e destruído/recriado antes disso, o `waitUntil` pode falhar.
+**Dados afetados por gravidade:**
 
-**Impacto:** Possível não-renderização em alguns cenários de timing.
+| Dado | Fonte | Mitigação atual |
+|---|---|---|
+| XP / patente (`goa-rank-status`) | Somente `fetch` interceptado por `inject.js` | ⚠️ Nenhuma — depende do timing da API |
+| Ranking de experiência | `inject.js` + `ExperienceRankingMonitor` (10min) | ✅ Monitor repopula mesmo após reload |
+| Ranking Fireteam (clã e jogador) | `inject.js` + `FireteamRankingMonitor` (10min) | ✅ Monitor repopula mesmo após reload |
 
-**Solução sugerida:** `chrome.storage.session` (MV3) para cache entre navegações sem exigir reload.
+**Impacto real:** Restrito a dados de XP/patente em navegações diretas com timing desfavorável. Dados de ranking são cobertos pelos monitores periódicos.
+
+**Solução sugerida:** `chrome.storage.session` (MV3) para persistir dados de XP/patente entre navegações sem reexigir a interceptação do fetch.
 
 ---
 
