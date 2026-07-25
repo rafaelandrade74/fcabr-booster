@@ -62,20 +62,9 @@ Qualquer atualização de CSS no FCABR (refatoração, bump de Tailwind, mudanç
 
 ---
 
-#### TD-004: `console.warn` em Produção
+#### ~~TD-004: `console.warn` em Produção~~ ✅ Resolvido
 
-**Arquivo:** `src/lib/experience-card.js`
-
-**Problema:**
-```js
-console.warn("Base XP is undefined or null");
-console.warn("Remaining XP is undefined or null");
-console.warn("Next XP is undefined or null");
-```
-
-Logs em produção expõem detalhes internos da extensão no console do usuário.
-
-**Solução sugerida:** Remover ou condicionar a uma flag `DEBUG`.
+Os `console.warn` foram substituídos por `dwarn` (wrapper condicional a `__FCABR_DEBUG__`), que só emite logs em builds de desenvolvimento. Em produção o console do usuário permanece limpo.
 
 ---
 
