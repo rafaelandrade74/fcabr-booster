@@ -151,11 +151,9 @@ Licença a definir pelo projeto.
 
 ---
 
-#### TD-009: CHANGELOG.md Incompleto
+#### ~~TD-009: CHANGELOG.md Incompleto~~ ✅ Resolvido
 
-**Arquivo:** `CHANGELOG.md`
-
-Documenta apenas a versão `0.1.0`, mas o `manifest.json` está na `0.1.2`. As mudanças das versões `0.1.1` e `0.1.2` não estão documentadas.
+CHANGELOG atualizado e mantido a partir da v0.4.1. Versões 0.1.0 a 0.4.2 documentadas; seção `## Unreleased` em uso para mudanças ainda sem número de versão.
 
 ---
 

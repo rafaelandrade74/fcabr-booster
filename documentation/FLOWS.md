@@ -11,11 +11,12 @@ sequenceDiagram
     participant Page as fcabr.net
 
     Browser->>Content: Carrega content script (document_start)
-    Content->>Page: Cria <script src="inject.js"> e insere no <head>
-    Page->>Inject: Executa inject.js no Main World
+    Content->>Content: Gera PAGE_TOKEN e MANAGER_TOKEN (crypto.randomUUID)
+    Content->>Page: Cria <script src="inject.js" data-fcabr-token=PAGE_TOKEN> e insere no <head>
+    Page->>Inject: Executa inject.js no Main World (lê TOKEN de document.currentScript.dataset)
     Inject->>Page: Monkey-patch window.fetch
-    Content->>Page: Cria <script src="monitor-manager.js"> (se features ativas)
-    Page->>Monitor: Executa monitor-manager.js no Main World
+    Content->>Page: Cria <script src="monitor-manager.js" data-fcabr-token=PAGE_TOKEN data-fcabr-manager-token=MANAGER_TOKEN> (se features ativas)
+    Page->>Monitor: Executa monitor-manager.js no Main World (lê PAGE_TOKEN e CONFIG_TOKEN)
     Monitor->>Monitor: Inicia ExperienceRankingMonitor e/ou FireteamRankingMonitor
     Monitor->>Monitor: Inicia polling de 1s para detectar troca de perfil
     Content->>Content: Intercepta localStorage.setItem
@@ -42,7 +43,7 @@ sequenceDiagram
     Inject->>Page: Chama fetch original
     Page-->>Inject: Response
     Inject->>Inject: Clona response e parseia JSON
-    Inject->>Content: postMessage({source:"FCABR_EXTENSION", url, data})
+    Inject->>Content: postMessage({source:"FCABR_EXTENSION", token:PAGE_TOKEN, url, data})
     Content->>Content: Encontra apiRoute via regex
     Content->>Profile: storageKeyGoaRankStatus(data)
     Profile-->>Content: [keyByOidUser, keyByNickname]
@@ -69,7 +70,7 @@ sequenceDiagram
         Monitor->>API: XHR GET /ranking/player?tab=experience&pageSize=1000
         API-->>Monitor: Lista de jogadores com ranks
         Monitor->>Monitor: Encontra jogador por oidUser
-        Monitor->>Content: postMessage({url:"fcabr://ranking/experience-position", data})
+        Monitor->>Content: postMessage({source:"FCABR_EXTENSION", token:PAGE_TOKEN, url:"fcabr://ranking/experience-position", data})
     end
 
     alt FireteamRankingMonitor
@@ -77,10 +78,10 @@ sequenceDiagram
         API-->>Monitor: {oidGuild}
         Monitor->>API: XHR GET /ranking/clan/fireteam?...
         API-->>Monitor: {rank, pointTotal, currentWeekID}
-        Monitor->>Content: postMessage({url:"fcabr://ranking/fireteam/clan", data})
+        Monitor->>Content: postMessage({source:"FCABR_EXTENSION", token:PAGE_TOKEN, url:"fcabr://ranking/fireteam/clan", data})
         Monitor->>API: XHR GET /ranking/clan/fireteam/{oidGuild}/players?weekId=...
         API-->>Monitor: Lista de jogadores do clã
-        Monitor->>Content: postMessage({url:"fcabr://ranking/fireteam/clan/player", data})
+        Monitor->>Content: postMessage({source:"FCABR_EXTENSION", token:PAGE_TOKEN, url:"fcabr://ranking/fireteam/clan/player", data})
     end
 
     Content->>Storage: StorageService.set(key, data)

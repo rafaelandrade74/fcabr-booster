@@ -23,22 +23,39 @@ Manifest V3 (MV3) traz melhorias de segurança em relação ao MV2:
 
 **Código:**
 ```js
+// content.js (Isolated World) — gera tokens únicos por sessão
+const PAGE_TOKEN = crypto.randomUUID();
+const MANAGER_TOKEN = crypto.randomUUID();
+
+// token passado via data-* antes de inserir o <script> no DOM
+script.dataset.fcabrToken = PAGE_TOKEN;
+
+// inject.js / monitor-manager.js (Main World) — lê token na inicialização
+const TOKEN = document.currentScript?.dataset.fcabrToken;
+
+// validação no listener do content script
 window.addEventListener("message", async event => {
     if (event.source !== window) return;
     if (event.data?.source !== "FCABR_EXTENSION") return;
+    if (event.data?.token !== PAGE_TOKEN) return;  // ← autenticação por token
     ...
 });
 ```
 
 **Análise:**
 - `event.source !== window`: filtra mensagens de iframes e outros frames. ✅
-- `event.data?.source !== "FCABR_EXTENSION"`: filtra por tag customizada. ⚠️
+- `event.data?.source !== "FCABR_EXTENSION"`: tag de identificação. ✅
+- `event.data?.token !== PAGE_TOKEN`: token UUID gerado no Isolated World, inacessível a scripts de página. ✅
 
-**Vulnerabilidade potencial:** Qualquer código JavaScript na página pode enviar `postMessage` com `{source: "FCABR_EXTENSION", url: "...", data: {...}}` e injetar dados falsos no `StorageService`. Um script malicioso no fcabr.net poderia forjar dados de XP/patente.
+**Por que funciona:** Os tokens são gerados com `crypto.randomUUID()` dentro do content script, que roda no Isolated World — scripts de página não têm acesso a essa memória. Os tokens são compartilhados com os scripts injetados exclusivamente via atributo `data-*` no momento da inserção do `<script>`, e o elemento é removido imediatamente após a carga.
 
-**Mitigação existente:** Limitada ao domínio `fcabr.net` pelo `manifest.json`. Conteúdo de terceiros injetado na página (ads, etc.) poderia explorar isso.
+**Canais protegidos:**
 
-**Impacto:** Baixo — afeta apenas dados visuais de XP no perfil do usuário, sem consequências de segurança além de desinformação.
+| Canal | Token | Direção |
+|---|---|---|
+| `inject.js` → `content.js` | `PAGE_TOKEN` | page → content |
+| `monitor-manager.js` → `content.js` | `PAGE_TOKEN` | page → content |
+| `content.js` → `monitor-manager.js` (CONFIG_UPDATE) | `MANAGER_TOKEN` | content → page |
 
 ---
 
@@ -116,7 +133,7 @@ Nenhum dado sensível (tokens, senhas, dados pessoais) é tratado pela extensão
 
 | Risco | Severidade | Exploitabilidade | Status |
 |---|---|---|---|
-| Injeção de dados via postMessage forjado | Baixa | Requer JS na página | Aceito |
+| Injeção de dados via postMessage forjado | Baixa | Requer JS na página | ✅ Corrigido — tokens UUID por sessão |
 | Quebra de layout por mudança CSS do FCABR | Média | Automática | Sem mitigação |
 | Dados ausentes (cache volátil) | Média | Ao recarregar | Limitação conhecida |
 | Exposição de oidUser | Muito baixa | Apenas em memória | Aceitável |

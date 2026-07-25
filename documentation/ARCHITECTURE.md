@@ -51,7 +51,9 @@ O projeto organiza o código por responsabilidade funcional:
 │    ├── ExperienceRankingMonitor (polling 10min + on-switch) │
 │    └── FireteamRankingMonitor   (polling 10min + on-switch) │
 └────────────────────┬────────────────────────────────────────┘
-                     │ postMessage("FCABR_EXTENSION")
+                     │ postMessage("FCABR_EXTENSION" + PAGE_TOKEN)
+                     │ ← token UUID gerado no Isolated World,
+                     │   passado via data-* no <script> injetado
 ┌────────────────────▼────────────────────────────────────────┐
 │           ISOLATED WORLD (content script)                   │
 │                                                             │

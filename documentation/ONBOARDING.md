@@ -14,14 +14,14 @@
 # 1. Instalar dependências
 npm install
 
-# 2. Build de produção
+# 2. Build de produção (bundle minificado, sem debug)
 npm run build
 
-# 3. Build com watch (recompila ao salvar)
+# 3. Build de desenvolvimento com watch (source maps, logs de debug ativos)
 npm run dev
 ```
 
-O build gera a pasta `dist/`.
+O build gera a pasta `dist/`. Use `npm run dev` durante o desenvolvimento — o bundle não-minificado e os source maps tornam a depuração no DevTools muito mais fácil.
 
 ---
 

@@ -26,8 +26,8 @@ npm install
 
 | Comando | Descrição |
 |---|---|
-| `npm run build` | Build de produção na pasta `dist/` |
-| `npm run dev` | Build em modo watch (recompila ao salvar) |
+| `npm run build` | Build de produção na pasta `dist/` — bundle minificado, sem source maps, sem logs de debug |
+| `npm run dev` | Build em modo development com watch — bundle legível, source maps ativos, logs de debug habilitados |
 | `npm run release` | Build de produção + gera `release-v{version}.zip` |
 
 ## Instalação da Extensão (modo desenvolvedor)

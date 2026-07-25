@@ -38,27 +38,18 @@ Casos a testar:
 ### M-007: Remover Métodos Não Utilizados de `dom.js`
 Ou documentá-los explicitamente como "API pública para uso futuro".
 
-### M-008: Adicionar `source maps` para Debug
-No `webpack.config.js`:
-```js
-devtool: argv.mode === 'development' ? 'inline-source-map' : false
-```
+### ~~M-008: Adicionar `source maps` para Debug~~ ✅ Implementado
+`devtool: "cheap-module-source-map"` ativo em `development`; `false` em `production`.
 
-### M-009: Separar Build de Dev e Produção
-Atualmente ambos usam `mode=production`. Em dev, minificação dificulta o debug.
+### ~~M-009: Separar Build de Dev e Produção~~ ✅ Implementado
+`npm run dev` usa `--mode development` — bundle não-minificado, source maps ativos, `__FCABR_DEBUG__` = `true`. `npm run build` e `npm run release` usam `--mode production`.
 
 ---
 
 ## Segurança
 
-### M-010: Adicionar Nonce ao Script Injetado
-Gerar um nonce único por sessão para validar as mensagens postMessage:
-
-```js
-const nonce = crypto.randomUUID();
-// Compartilhar nonce via atributo no script tag
-// Verificar nonce nas mensagens recebidas
-```
+### ~~M-010: Adicionar Nonce ao Script Injetado~~ ✅ Implementado
+Tokens UUID gerados com `crypto.randomUUID()` no Isolated World são passados via `data-*` para os scripts injetados e verificados em cada listener `postMessage`. Dois tokens independentes protegem as duas direções de comunicação.
 
 ---
 
