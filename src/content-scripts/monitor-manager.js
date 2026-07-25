@@ -1,12 +1,24 @@
+import { dlog, dwarn, derror } from "../utils/debug-log.js";
+import { FALLBACK_OID_USER_KEY } from "../data/api-route-keys.js";
+
 (() => {
 
     // ---- Utilitários compartilhados ----
 
     function getCurrentUserId() {
         const key = Object.keys(localStorage).find(k => k.startsWith("selected-profile-"));
-        if (!key) return null;
-        const value = Number(localStorage.getItem(key));
-        return Number.isNaN(value) ? null : value;
+        if (key) {
+            const value = Number(localStorage.getItem(key));
+            if (!Number.isNaN(value)) return value;
+            dwarn("[FCABR][monitor-manager] getCurrentUserId: valor não numérico em", key, "=", localStorage.getItem(key));
+        }
+
+        const fallbackValue = Number(localStorage.getItem(FALLBACK_OID_USER_KEY));
+        if (Number.isNaN(fallbackValue)) {
+            dwarn("[FCABR][monitor-manager] getCurrentUserId: nenhuma chave 'selected-profile-*' nem fallback encontrados no localStorage");
+            return null;
+        }
+        return fallbackValue;
     }
 
     // XHR evita que inject.js intercepte e reposte os dados brutos das respostas
@@ -16,15 +28,29 @@
             xhr.open("GET", url);
             xhr.setRequestHeader("Accept", "application/json");
             xhr.onload = function () {
-                if (xhr.status < 200 || xhr.status >= 300) return resolve(null);
-                try { resolve(JSON.parse(xhr.responseText)); } catch { resolve(null); }
+                if (xhr.status < 200 || xhr.status >= 300) {
+                    dwarn("[FCABR][monitor-manager] xhrGet status inválido:", xhr.status, url);
+                    return resolve(null);
+                }
+                try {
+                    const parsed = JSON.parse(xhr.responseText);
+                    dlog("[FCABR][monitor-manager] xhrGet OK:", url, parsed);
+                    resolve(parsed);
+                } catch (err) {
+                    derror("[FCABR][monitor-manager] xhrGet falha ao parsear JSON:", url, xhr.responseText, err);
+                    resolve(null);
+                }
             };
-            xhr.onerror = () => resolve(null);
+            xhr.onerror = (err) => {
+                derror("[FCABR][monitor-manager] xhrGet erro de rede (possível CORS/bloqueio):", url, err);
+                resolve(null);
+            };
             xhr.send();
         });
     }
 
     function postExtensionMessage(url, data) {
+        dlog("[FCABR][monitor-manager] postExtensionMessage:", url, data);
         window.postMessage({ source: "FCABR_EXTENSION", url, data });
     }
 
@@ -52,14 +78,23 @@
 
         async execute() {
             const oidUser = getCurrentUserId();
-            if (!oidUser) return;
+            if (!oidUser) {
+                dwarn("[FCABR][ExperienceRankingMonitor] abortado: oidUser não encontrado");
+                return;
+            }
 
             const body = await xhrGet(ExperienceRankingMonitor.API_URL);
-            if (!body) return;
+            if (!body) {
+                dwarn("[FCABR][ExperienceRankingMonitor] abortado: resposta da API vazia/nula");
+                return;
+            }
 
             const players = Array.isArray(body?.data) ? body.data : [];
             const player = players.find(p => p.oidUser === oidUser);
-            if (!player) return;
+            if (!player) {
+                dwarn("[FCABR][ExperienceRankingMonitor] abortado: oidUser", oidUser, "não encontrado em", players.length, "jogadores retornados");
+                return;
+            }
 
             postExtensionMessage(ExperienceRankingMonitor.SYNTHETIC_URL, {
                 oidUser: player.oidUser,
@@ -85,21 +120,33 @@
         async execute() {
             // 1. Obter userId do localStorage
             const oidUser = getCurrentUserId();
-            if (!oidUser) return;
+            if (!oidUser) {
+                dwarn("[FCABR][FireteamRankingMonitor] abortado: oidUser não encontrado");
+                return;
+            }
 
             // 2. Obter oidGuild via profile
             const profile = await xhrGet(FireteamRankingMonitor.API_PROFILE + oidUser);
             const oidGuild = profile?.data?.clanInfo?.oidGuild;
-            if (!oidGuild) return;
+            if (!oidGuild) {
+                dwarn("[FCABR][FireteamRankingMonitor] abortado: oidGuild não encontrado no profile", profile);
+                return;
+            }
 
             // 3. Consultar FireteamClan — obter posição do clã e currentWeekID
             const clanBody = await xhrGet(FireteamRankingMonitor.API_FIRETEAM_CLAN);
-            if (!clanBody) return;
+            if (!clanBody) {
+                dwarn("[FCABR][FireteamRankingMonitor] abortado: resposta de FIRETEAM_CLAN vazia/nula");
+                return;
+            }
 
             const currentWeekID = clanBody?.meta?.currentWeekID ?? clanBody?.meta?.weekId;
             const clans = Array.isArray(clanBody?.data) ? clanBody.data : [];
             const clan = clans.find(c => c.oidGuild === oidGuild);
-            if (!clan) return;
+            if (!clan) {
+                dwarn("[FCABR][FireteamRankingMonitor] abortado: oidGuild", oidGuild, "não encontrado em", clans.length, "clãs retornados");
+                return;
+            }
 
             // Publicar mapeamento usuário → clã (necessário para renderização em profile.js)
             postExtensionMessage(FireteamRankingMonitor.URL_USER_CLAN, { oidUser, oidGuild });
@@ -111,7 +158,10 @@
                 pointTotal: clan.pointTotal ?? clan.points ?? 0
             });
 
-            if (!currentWeekID) return;
+            if (!currentWeekID) {
+                dwarn("[FCABR][FireteamRankingMonitor] abortado: currentWeekID ausente", clanBody?.meta);
+                return;
+            }
 
             // 4. Consultar FireteamClanPlayer — posição do jogador no ranking do clã
             const playersUrl = FireteamRankingMonitor.API_FIRETEAM_CLAN_PLAYERS
@@ -119,11 +169,17 @@
                 .replace("{weekId}", currentWeekID);
 
             const playersBody = await xhrGet(playersUrl);
-            if (!playersBody) return;
+            if (!playersBody) {
+                dwarn("[FCABR][FireteamRankingMonitor] abortado: resposta de FIRETEAM_CLAN_PLAYERS vazia/nula", playersUrl);
+                return;
+            }
 
             const players = Array.isArray(playersBody?.data) ? playersBody.data : [];
             const player = players.find(p => p.oidUser === oidUser);
-            if (!player) return;
+            if (!player) {
+                dwarn("[FCABR][FireteamRankingMonitor] abortado: oidUser", oidUser, "não encontrado em", players.length, "jogadores do clã");
+                return;
+            }
 
             postExtensionMessage(FireteamRankingMonitor.URL_CLAN_PLAYER, {
                 oidUser: player.oidUser,
@@ -187,14 +243,20 @@
     // document.currentScript só está disponível durante a execução síncrona do script
     const datasetSnapshot = {};
     const cs = document.currentScript;
+    dlog("[FCABR][monitor-manager] monitor-manager.js executando. currentScript:", cs, "userAgent:", navigator.userAgent);
     if (cs) {
         for (const key of Object.keys(cs.dataset)) {
             datasetSnapshot[key] = cs.dataset[key];
         }
+    } else {
+        dwarn("[FCABR][monitor-manager] document.currentScript é null/undefined — dataset não pôde ser lido, nenhum monitor será iniciado");
     }
+
+    dlog("[FCABR][monitor-manager] datasetSnapshot:", datasetSnapshot);
 
     const manager = new ApiMonitorManager();
     manager.start(datasetSnapshot);
+    dlog("[FCABR][monitor-manager] manager.start() concluído. monitores ativos:", Array.from(manager._monitors.keys()));
 
     // Detecta troca de perfil comparando o ID salvo com o valor atual do localStorage
     let lastProfileId = getCurrentUserId();

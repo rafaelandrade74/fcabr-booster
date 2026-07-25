@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
@@ -17,6 +18,9 @@ module.exports = (_, argv = {}) => ({
     publicPath: "",
   },
   plugins: [
+    new webpack.DefinePlugin({
+      __FCABR_DEBUG__: JSON.stringify(!!argv.watch),
+    }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, "src/options/popup.html"),
       filename: "popup.html",

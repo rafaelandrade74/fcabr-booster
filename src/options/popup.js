@@ -1,5 +1,5 @@
 import { initializeStoredValues } from "../utils";
-import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS } from "../utils/settings";
+import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS, MAX_RANKING_INTERVAL_MS } from "../utils/settings";
 
 const DEFAULT_PANEL = "patents";
 const PANEL_STORAGE_KEY = "activeAccordionGroup";
@@ -21,6 +21,11 @@ function setElementVisibility(element, isHidden) {
 function renderToggleState(toggleElement, labelElement, isEnabled) {
   if (toggleElement) toggleElement.checked = isEnabled;
   if (labelElement) labelElement.textContent = isEnabled ? "Ativado" : "Desativado";
+}
+
+function formatInterval(ms) {
+  const minutes = Math.round(ms / 60000);
+  return minutes >= 60 ? "1 hora" : `${minutes} min`;
 }
 
 function initSidebarNav(activePanel) {
@@ -56,7 +61,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const toggleLabel = document.querySelector("[data-switch-label]");
   const showExperienceRankingToggle = document.querySelector("#show-experience-ranking");
   const rankingToggleLabel = document.querySelector("[data-ranking-switch-label]");
-  const rankingIntervalSelect = document.querySelector("#ranking-interval");
+  const rankingIntervalSlider = document.querySelector("#ranking-interval");
+  const rankingIntervalValueLabel = document.querySelector("#ranking-interval-value");
   const showFireteamClanRankToggle = document.querySelector("#show-fireteam-clan-rank");
   const fireteamClanLabel = document.querySelector("[data-fireteam-clan-label]");
   const showFireteamPlayerRankToggle = document.querySelector("#show-fireteam-player-rank");
@@ -93,13 +99,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderToggleState(showFireteamPlayerPointsToggle, fireteamPlayerPointsLabel, Boolean(storedSettings.showFireteamPlayerPoints));
   renderToggleState(showFireteamPlayerXpToggle, fireteamXpLabel, Boolean(storedSettings.showFireteamPlayerXp));
 
-  if (rankingIntervalSelect) {
+  if (rankingIntervalSlider) {
     const storedInterval = Number(storedSettings.rankingInterval);
-    const safeInterval = Math.max(MIN_RANKING_INTERVAL_MS, storedInterval);
-    rankingIntervalSelect.value = String(safeInterval);
-    if (rankingIntervalSelect.value !== String(safeInterval)) {
-      rankingIntervalSelect.value = String(MIN_RANKING_INTERVAL_MS);
-    }
+    const safeInterval = Math.min(MAX_RANKING_INTERVAL_MS, Math.max(MIN_RANKING_INTERVAL_MS, storedInterval));
+    rankingIntervalSlider.value = String(safeInterval);
+    if (rankingIntervalValueLabel) rankingIntervalValueLabel.textContent = formatInterval(safeInterval);
     if (safeInterval !== storedInterval) {
       await chrome.storage.local.set({ rankingInterval: safeInterval });
     }
@@ -152,7 +156,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     saveToggle("showFireteamPlayerXp", event.target.checked);
   });
 
-  rankingIntervalSelect?.addEventListener("change", (event) => {
+  rankingIntervalSlider?.addEventListener("input", (event) => {
+    if (rankingIntervalValueLabel) rankingIntervalValueLabel.textContent = formatInterval(Number(event.target.value));
+  });
+
+  rankingIntervalSlider?.addEventListener("change", (event) => {
     saveSelect("rankingInterval", event.target.value);
   });
 

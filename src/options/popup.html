@@ -127,19 +127,23 @@
             </div>
 
             <div class="panel" id="panel-general" hidden>
-              <div class="setting-row">
+              <div class="setting-row setting-row--stack">
                 <div class="setting-copy">
                   <p class="setting-title">Intervalo de atualização</p>
                   <p class="setting-help">Frequência de consulta para todos os rankings.</p>
                 </div>
-                <select id="ranking-interval" class="select" aria-label="Intervalo de atualização">
-                  <option value="600000">10 min</option>
-                  <option value="1200000">20 min</option>
-                  <option value="1800000">30 min</option>
-                  <option value="2400000">40 min</option>
-                  <option value="3000000">50 min</option>
-                  <option value="3600000">1 hora</option>
-                </select>
+                <div class="slider-control">
+                  <input
+                    id="ranking-interval"
+                    class="slider"
+                    type="range"
+                    min="60000"
+                    max="3600000"
+                    step="60000"
+                    aria-label="Intervalo de atualização"
+                  />
+                  <span class="slider-value" id="ranking-interval-value">1 min</span>
+                </div>
               </div>
             </div>
 

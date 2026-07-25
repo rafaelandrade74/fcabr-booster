@@ -7,7 +7,7 @@ import { DEFAULT_SETTINGS } from "../../utils/settings";
 import { getTranslations } from "../../translations";
 import StorageService from "../../lib/storage-service";
 import { RouteKeys } from "../../data/routekeys.js";
-import { RouteKeyProfile } from "../../data/api-route-keys.js";
+import { RouteKeyProfile, FALLBACK_OID_USER_KEY } from "../../data/api-route-keys.js";
 
 /**
  * Retorna o tipo da página de perfil.
@@ -28,7 +28,7 @@ function getProfilePageType(pathname = window.location.pathname) {
     return match;
 }
 
-export async function profilePage() {    
+export async function profilePage() {
     const currentPath = `${window.location.pathname}${window.location.search}`;
     const mathUrl = getProfilePageType(currentPath);
 
@@ -54,6 +54,12 @@ export async function profilePage() {
 
     // só renderiza se for os dados do proprio boneco
     if (tipoPagina === "PF" && data.data.nickname !== playerName) return;
+
+    // PFP = perfil do próprio usuário logado: usar como fallback para oidUser
+    // quando o site não gravou "selected-profile-*" no localStorage.
+    if (tipoPagina === "PFP" && data.data.oidUser) {
+        localStorage.setItem(FALLBACK_OID_USER_KEY, String(data.data.oidUser));
+    }
 
     /**
      * @type {Translations}
