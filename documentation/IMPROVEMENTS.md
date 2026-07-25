@@ -5,8 +5,8 @@
 ### ~~M-001: Resolver a Dependência Circular~~ ✅ Implementado
 Criado `src/data/api-route-keys.js` com `storageKeyGoaRankStatus` e `RouteKeyProfile`, eliminando a dependência circular.
 
-### M-002: Usar `chrome.storage.session` para Cache
-Substituir o `Map` em memória do `StorageService` por `chrome.storage.session` (disponível no MV3). Os dados persistiriam durante a sessão de navegação mas seriam limpos ao fechar o navegador.
+### M-002: Cache entre Reloads — Descartado
+`chrome.storage.session` e `sessionStorage` do site foram testados e ambos lançam `"Access to storage is not allowed from this context"` no contexto de content script. O `Map` em memória é a única opção viável — mantido como está.
 
 ### M-003: Background Service Worker
 Adicionar um service worker para centralizar a lógica de armazenamento e evitar a necessidade de postMessage entre Main World e Isolated World para dados de API.

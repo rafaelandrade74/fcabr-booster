@@ -34,7 +34,7 @@ Criado `src/data/api-route-keys.js` com `storageKeyGoaRankStatus` e `RouteKeyPro
 
 **Impacto:** Raro e restrito a dados de XP/patente; ocorre apenas quando a API responde devagar e o React recicla o DOM no intervalo. Na maioria dos casos a segunda chamada de `renderPage()` resolve.
 
-**Solução em aberto:** Não há solução simples sem alterar a arquitetura. Uma possibilidade seria o monitor de XP/patente fazer uma requisição XHR proativa no boot (como os monitores de ranking já fazem), eliminando a dependência do timing do fetch interceptado.
+**Solução em aberto:** `chrome.storage.session` e `sessionStorage` do site foram testados e ambos lançam `"Access to storage is not allowed from this context"` no contexto de content script. Alternativa viável: adicionar um monitor XHR proativo para `goa-rank-status` no boot, eliminando a dependência do timing do fetch interceptado — similar ao que os monitores de ranking já fazem.
 
 ---
 
