@@ -269,6 +269,7 @@ import { FALLBACK_OID_USER_KEY } from "../data/api-route-keys.js";
                     if (currentMonitor.intervalMs !== newInterval) {
                         clearInterval(this._timers.get(entry.id));
                         currentMonitor.intervalMs = newInterval;
+                        currentMonitor.execute();
                         this._timers.set(entry.id, setInterval(() => currentMonitor.execute(), newInterval));
                         dlog("[FCABR][ApiMonitorManager] interval atualizado:", entry.id, "->", newInterval);
                     }
