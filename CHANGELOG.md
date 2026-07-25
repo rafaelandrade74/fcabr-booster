@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.2
+
+- Implementa Hot Reload das configurações via `ConfigDispatcher`: alterações no popup são refletidas imediatamente na página sem recarregar a aba
+- Cria `ConfigDispatcher` com único listener `chrome.storage.onChanged` e API de subscribe/unsubscribe para notificar apenas os assinantes afetados
+- Remove `chrome.tabs.reload()` do popup — a página reage via eventos
+- Separa controles de "Próxima Patente" e "Ranking de Experiência" como flags independentes; cada um responde apenas à sua própria configuração
+- Cria `PageSnapshot`: snapshot em memória do estado original dos elementos modificados pela feature "Próxima Patente"; restaura os valores originais ao desabilitar sem nova consulta ao storage
+- Adiciona `ApiMonitorManager.update()` para iniciar, parar ou reconfigurar monitores em tempo real via `window.postMessage`
+- Executa consulta imediata ao alterar o intervalo de atualização antes de iniciar o novo ciclo, sem aguardar o tempo completo decorrer
+- Simplifica rótulos de posição no card Fireteam: "Posição do Clã" e "Posição no Clã" → "Posição"; "Clan Rank" e "Player Rank" → "Rank"
+- Corrige renderização do slider no Opera com estilização explícita de `::-webkit-slider-thumb` e `::-webkit-slider-runnable-track`
+
 ## 0.4.1
 
 - Exibe campos Fireteam com valor `0` quando o jogador não possui dados no ranking
