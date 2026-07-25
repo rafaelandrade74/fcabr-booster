@@ -213,7 +213,7 @@ window.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("popstate", checkUrlChange);
 
     // Fallback para casos onde o framework altera a URL sem disparar os eventos acima
-    setInterval(checkUrlChange, 200);
+    setInterval(checkUrlChange, 1000);
     renderPage();
 });
 

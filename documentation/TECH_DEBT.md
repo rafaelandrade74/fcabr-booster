@@ -79,21 +79,9 @@ Logs em produção expõem detalhes internos da extensão no console do usuário
 
 ---
 
-#### TD-005: `setInterval` de 200ms Rodando Continuamente
+#### ~~TD-005: `setInterval` de 200ms Rodando Continuamente~~ ✅ Resolvido
 
-**Arquivo:** `src/content-scripts/content.js`
-
-**Situação atual:**
-```js
-// Fallback para casos onde o framework altera a URL sem disparar os eventos acima
-setInterval(checkUrlChange, 200);
-```
-
-O intervalo é intencional e está documentado no código — existe como último recurso para navegações SPA que escapam dos patches de `pushState`/`replaceState` e do evento `popstate`. O Next.js (usado pelo fcabr.net) pode alterar a URL via Router interno sem passar pelos mecanismos padrão em alguns cenários (ex.: shallow routing, prefetch).
-
-**Impacto real:** Baixo. `checkUrlChange` é uma função trivial (`location.href === lastUrl ? return : renderPage()`); o custo por tick é desprezível. O impacto de falso negativo (não detectar a navegação) seria maior do que o custo do polling.
-
-**Possível melhoria:** Aumentar o intervalo para 1000ms — a diferença de responsividade seria imperceptível para o usuário e reduziria o número de ticks em 5×. Remover completamente só seria seguro após confirmar que os patches cobrem 100% das navegações do Next.js em uso.
+Intervalo aumentado de 200ms para 1000ms. O polling é fallback intencional para navegações SPA do Next.js que escapam dos patches de `pushState`/`replaceState` e do evento `popstate`. A diferença de responsividade é imperceptível para o usuário e o número de ticks foi reduzido em 5×.
 
 ---
 
