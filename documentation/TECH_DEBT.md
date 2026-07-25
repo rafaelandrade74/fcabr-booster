@@ -12,29 +12,29 @@ Criado `src/data/api-route-keys.js` com `storageKeyGoaRankStatus` e `RouteKeyPro
 
 ---
 
-#### TD-002: Cache Volátil — Dados de XP/Patente Perdidos ao Recarregar
+#### TD-002: Race Condition no Boot — Dados de XP/Patente
 
 **Arquivo:** `src/lib/storage-service.js`
 
-**Problema:** O `StorageService` usa um `Map` em memória — os dados são perdidos a cada reload ou navegação direta para a URL. O cache só é populado quando `inject.js` intercepta a resposta de uma chamada `fetch` da própria página.
+**Comportamento do cache (intencional):** O `StorageService` usa `Map` em memória. Os dados existem enquanto a aba estiver aberta e são descartados ao fechar a página — comportamento correto e desejado. `chrome.storage.session` foi avaliado e descartado: não salva nem recupera dados de forma confiável neste contexto.
 
-**Race condition no boot:**
-- Página carrega → site faz a chamada `GET /api/goa-rank-status` → `inject.js` intercepta → `postMessage` → `content.js` grava no cache → `renderPage()`
+**Problema real — race condition no boot:**
+- Página carrega → site faz `GET /api/goa-rank-status` → `inject.js` intercepta → `postMessage` → `content.js` grava no cache → `renderPage()`
 - Se `renderPage()` rodar antes da resposta da API (DOMContentLoaded rápido + API lenta), o cartão não é renderizado na primeira tentativa
 - Quando a API responde, `renderPage()` é chamado novamente — **normalmente resolve**
-- Exceção: se o DOM do cartão de XP for destruído e recriado pelo React entre as duas tentativas, o `waitUntil` da segunda rodada pode selecionar o elemento errado ou falhar no timeout
+- Exceção: se o React destruir e recriar o DOM do cartão entre as duas tentativas, o `waitUntil` da segunda rodada pode selecionar o elemento errado ou atingir timeout
 
-**Dados afetados por gravidade:**
+**Dados afetados:**
 
-| Dado | Fonte | Mitigação atual |
+| Dado | Fonte | Situação |
 |---|---|---|
-| XP / patente (`goa-rank-status`) | Somente `fetch` interceptado por `inject.js` | ⚠️ Nenhuma — depende do timing da API |
-| Ranking de experiência | `inject.js` + `ExperienceRankingMonitor` (10min) | ✅ Monitor repopula mesmo após reload |
-| Ranking Fireteam (clã e jogador) | `inject.js` + `FireteamRankingMonitor` (10min) | ✅ Monitor repopula mesmo após reload |
+| XP / patente (`goa-rank-status`) | Somente `fetch` interceptado por `inject.js` | ⚠️ Sujeito à race condition acima |
+| Ranking de experiência | `inject.js` + `ExperienceRankingMonitor` (10min) | ✅ Monitor repopula independentemente |
+| Ranking Fireteam (clã e jogador) | `inject.js` + `FireteamRankingMonitor` (10min) | ✅ Monitor repopula independentemente |
 
-**Impacto real:** Restrito a dados de XP/patente em navegações diretas com timing desfavorável. Dados de ranking são cobertos pelos monitores periódicos.
+**Impacto:** Raro e restrito a dados de XP/patente; ocorre apenas quando a API responde devagar e o React recicla o DOM no intervalo. Na maioria dos casos a segunda chamada de `renderPage()` resolve.
 
-**Solução sugerida:** `chrome.storage.session` (MV3) para persistir dados de XP/patente entre navegações sem reexigir a interceptação do fetch.
+**Solução em aberto:** Não há solução simples sem alterar a arquitetura. Uma possibilidade seria o monitor de XP/patente fazer uma requisição XHR proativa no boot (como os monitores de ranking já fazem), eliminando a dependência do timing do fetch interceptado.
 
 ---
 
