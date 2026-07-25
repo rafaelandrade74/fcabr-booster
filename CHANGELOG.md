@@ -4,6 +4,10 @@
 
 - Corrige injeção de dados via `postMessage` forjado: tokens UUID gerados no content script (mundo isolado) autenticam cada canal de comunicação entre scripts da página e o content script, impedindo que scripts maliciosos injetem dados ou alterem configurações dos monitores
 - Configura modos `development` e `production` corretamente no webpack: `npm run dev` gera bundle não-minificado com source maps e `__FCABR_DEBUG__` ativo; `npm run build` e `npm run release` geram bundle otimizado sem debug
+- Aumenta intervalo do polling de detecção de URL de 200ms para 1000ms, reduzindo ticks em 5× sem impacto perceptível na responsividade da navegação SPA
+- Remove `DOM.wait()` (MutationObserver) e demais métodos não utilizados de `dom.js`; classe retém apenas `waitUntil`, `$$` e `byTextVisible`
+- Remove entradas de ícone `16` e `32` do `manifest.json`, que apontavam incorretamente para o arquivo de 48px
+- Adiciona licença MIT
 
 ## 0.4.2
 
