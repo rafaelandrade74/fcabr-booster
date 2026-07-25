@@ -1,4 +1,5 @@
 import DOM from "./dom";
+import PageSnapshot from "./page-snapshot.js";
 
 export default class ExperienceCard {
     /**
@@ -237,6 +238,45 @@ export default class ExperienceCard {
     /** @returns {HTMLElement | null} */
     get progressBar() {
         return /** @type {HTMLElement | null} */ (this.card?.querySelector(".bg-gradient-to-r") || null);
+    }
+
+    /**
+     * Captura o estado original dos spans do footer e da barra de progresso.
+     * No-op se o snapshot para esta chave já existir.
+     * @param {string} key
+     */
+    captureSnapshot(key) {
+        if (PageSnapshot.has(key)) return;
+
+        const spans = this.getFooterSpans();
+        const progressBar = this.progressBar;
+
+        PageSnapshot.capture(key, {
+            spanTexts: spans.map(s => {
+                const node = s.firstChild;
+                return node?.nodeType === Node.TEXT_NODE ? node.nodeValue : s.textContent;
+            }),
+            progressWidth: progressBar?.style.width ?? "",
+        });
+    }
+
+    /**
+     * Restaura o estado original dos spans do footer e da barra de progresso
+     * a partir do snapshot previamente capturado.
+     * @param {string} key
+     */
+    restoreSnapshot(key) {
+        const snapshot = PageSnapshot.get(key);
+        if (!snapshot) return;
+
+        const spans = this.getFooterSpans();
+        snapshot.spanTexts.forEach((text, i) => {
+            if (spans[i]) setSpanText(spans[i], text);
+        });
+
+        if (this.progressBar && snapshot.progressWidth !== undefined) {
+            this.progressBar.style.width = snapshot.progressWidth;
+        }
     }
 
     /**

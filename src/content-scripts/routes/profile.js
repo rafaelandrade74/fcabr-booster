@@ -9,6 +9,8 @@ import StorageService from "../../lib/storage-service";
 import { RouteKeys } from "../../data/routekeys.js";
 import { RouteKeyProfile, FALLBACK_OID_USER_KEY } from "../../data/api-route-keys.js";
 
+const SNAPSHOT_KEY_XP = "xp-card-footer";
+
 /**
  * Retorna o tipo da página de perfil.
  *
@@ -81,12 +83,16 @@ export async function profilePage() {
         storedSettings.showFireteamPlayerXp
     );
 
-    // Hot-reload cleanup: remove our injected nodes when their feature is disabled
+    // Hot-reload cleanup: remove our injected nodes / restore original state when features are disabled
     if (!shouldShowAnyFireteam) {
         document.querySelectorAll(`[${FIRETEAM_CONTAINER_ATTR}]`).forEach(el => el.remove());
     }
     if (!shouldShowExperienceRanking) {
         document.querySelectorAll("[data-fcabr-rank-badge]").forEach(el => el.remove());
+    }
+    if (!shouldShowNextPatent) {
+        const tempCard = new ExperienceCard(translations, tipoPagina);
+        if (tempCard.card) tempCard.restoreSnapshot(SNAPSHOT_KEY_XP);
     }
 
     if (!shouldShowNextPatent && !shouldShowExperienceRanking && !shouldShowAnyFireteam) return;
@@ -109,6 +115,7 @@ export async function profilePage() {
             const baseExperiencePoints = currentPatent.targetXp;
             const remainingExperiencePoints = Math.max(0, nextExperiencePoints - currentExperiencePoints);
 
+            card.captureSnapshot(SNAPSHOT_KEY_XP);
             card.setBaseXp(baseExperiencePoints);
             card.setRemaining(remainingExperiencePoints);
             card.setNextXp(nextExperiencePoints);
