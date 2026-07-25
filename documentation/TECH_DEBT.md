@@ -115,24 +115,9 @@ Nenhum arquivo de teste existe no projeto. Zero cobertura de testes unitários o
 
 ---
 
-#### TD-011: Código Morto em `dom.js`
+#### ~~TD-011: Código Morto em `dom.js`~~ ✅ Resolvido
 
-**Arquivo:** `src/lib/dom.js`
-
-Os métodos abaixo existem mas não são referenciados em nenhum outro arquivo:
-
-| Método | Referenciado? |
-|---|---|
-| ~~`DOM.wait()`~~ | ✅ Removido |
-| `DOM.exists()` | ❌ Não |
-| `DOM.allText()` | ❌ Não |
-| `DOM.attr()` | ❌ Não |
-| `DOM.html()` | ❌ Não |
-| `DOM.text()` | ❌ Não |
-| `DOM.parent()` | ❌ Não |
-| `DOM.containsText()` | ❌ Não |
-
-**Sugestão:** Manter apenas os usados ou documentar como biblioteca para uso futuro.
+Todos os métodos sem uso externo removidos. `src/lib/dom.js` agora expõe apenas os três métodos efetivamente usados: `waitUntil`, `$$` e `byTextVisible`.
 
 ---
 

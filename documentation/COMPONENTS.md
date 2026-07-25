@@ -8,30 +8,17 @@ Este projeto não usa um framework de UI. Os "componentes" são classes JavaScri
 
 **Tipo:** Classe estática utilitária
 
-**Responsabilidade:** Abstração sobre a API nativa do DOM — seleção, busca por texto, espera assíncrona e navegação na árvore de elementos.
+**Responsabilidade:** Utilitários de DOM usados pelos componentes da extensão.
 
 ### Métodos
 
 | Método | Assinatura | Descrição |
 |---|---|---|
 | `waitUntil` | `(fn, timeout=10000, interval=100) → Promise` | Polling assíncrono até `fn()` retornar truthy. Lança Error no timeout. |
-| `wait` | `(predicate, timeout=10000) → Promise` | Aguarda elemento via MutationObserver. Mais eficiente que polling. |
-| `$` | `(selector, parent=document)` | `querySelector` com escopo opcional |
 | `$$` | `(selector, parent=document)` | `querySelectorAll` retornando array |
-| `byText` | `(selector, text, parent)` | Encontra elemento pelo texto exato |
-| `byTextVisible` | `(selector, text, parent)` | Idem, mas ignora elementos ocultos (`offsetParent === null`) |
-| `containsText` | `(selector, text, parent)` | Encontra elemento que contém o texto |
-| `closest` | `(element, selector)` | `element.closest` com null-safety |
-| `parent` | `(element, levels=1)` | Sobe N níveis na árvore DOM |
-| `exists` | `(selector, parent)` | Retorna booleano |
-| `allText` | `(selector, parent)` | Array com `.textContent.trim()` de todos os matches |
-| `attr` | `(selector, attribute, parent)` | Lê atributo do primeiro match |
-| `html` | `(selector, parent)` | `innerHTML` do primeiro match |
-| `text` | `(selector, parent)` | `textContent.trim()` do primeiro match |
+| `byTextVisible` | `(selector, text, parent)` | Encontra elemento pelo texto exato, ignorando elementos ocultos (`offsetParent === null`) |
 
-### Observações
-- Dois métodos de espera com filosofias diferentes: `waitUntil` (polling) e `wait` (MutationObserver). `waitUntil` é o usado na prática, mas `wait` é mais eficiente.
-- Todos os métodos são estáticos — a classe não é instanciada.
+Todos os métodos são estáticos — a classe não é instanciada.
 
 ---
 
