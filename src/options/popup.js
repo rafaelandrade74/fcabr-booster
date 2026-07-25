@@ -109,16 +109,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  let settingsChanged = false;
-
   async function saveToggle(key, checked) {
     await chrome.storage.local.set({ [key]: checked });
-    settingsChanged = true;
   }
 
   async function saveSelect(key, value) {
     await chrome.storage.local.set({ [key]: Number(value) });
-    settingsChanged = true;
   }
 
   showNextPatentToggle?.addEventListener("change", (event) => {
@@ -164,12 +160,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     saveSelect("rankingInterval", event.target.value);
   });
 
-  window.addEventListener("unload", () => {
-    if (settingsChanged) {
-      const activeTab = activeTabs[0];
-      if (activeTab?.id) {
-        chrome.tabs.reload(activeTab.id);
-      }
-    }
-  });
 });

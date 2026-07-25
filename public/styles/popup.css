@@ -302,8 +302,32 @@ h1 {
 
 .slider {
   flex: 1;
-  accent-color: var(--accent);
   cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+}
+
+/* Estilização explícita do thumb — garante renderização correta em todo o ecossistema
+   Chromium (Chrome, Opera, Edge), onde accent-color isolado pode não exibir o thumb. */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .slider:focus-visible {

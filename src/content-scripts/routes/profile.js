@@ -9,6 +9,8 @@ import StorageService from "../../lib/storage-service";
 import { RouteKeys } from "../../data/routekeys.js";
 import { RouteKeyProfile, FALLBACK_OID_USER_KEY } from "../../data/api-route-keys.js";
 
+const SNAPSHOT_KEY_XP = "xp-card-footer";
+
 /**
  * Retorna o tipo da página de perfil.
  *
@@ -72,6 +74,7 @@ export async function profilePage() {
     const storedSettings = await initializeStoredValues(DEFAULT_SETTINGS);
     const shouldShowNextPatent = Boolean(storedSettings.showNextPatent);
     const isOwnProfile = tipoPagina === "PFP";
+    const shouldShowExperienceRanking = isOwnProfile && Boolean(storedSettings.showExperienceRanking);
     const shouldShowAnyFireteam = isOwnProfile && (
         storedSettings.showFireteamClanRank ||
         storedSettings.showFireteamPlayerRank ||
@@ -80,7 +83,19 @@ export async function profilePage() {
         storedSettings.showFireteamPlayerXp
     );
 
-    if (!shouldShowNextPatent && !shouldShowAnyFireteam) return;
+    // Hot-reload cleanup: remove our injected nodes / restore original state when features are disabled
+    if (!shouldShowAnyFireteam) {
+        document.querySelectorAll(`[${FIRETEAM_CONTAINER_ATTR}]`).forEach(el => el.remove());
+    }
+    if (!shouldShowExperienceRanking) {
+        document.querySelectorAll("[data-fcabr-rank-badge]").forEach(el => el.remove());
+    }
+    if (!shouldShowNextPatent) {
+        const tempCard = new ExperienceCard(translations, tipoPagina);
+        if (tempCard.card) tempCard.restoreSnapshot(SNAPSHOT_KEY_XP);
+    }
+
+    if (!shouldShowNextPatent && !shouldShowExperienceRanking && !shouldShowAnyFireteam) return;
 
     // Aguardar até que o elemento de Experiência esteja presente na página.
     await DOM.waitUntil(() => ExperienceCard.findCardElementByName(translations, tipoPagina), 10000);
@@ -90,7 +105,7 @@ export async function profilePage() {
 
     const card = new ExperienceCard(translations, tipoPagina);
 
-    // ---- Renderização do card de XP ----
+    // ---- Renderização do card de XP (Próxima Patente) ----
     if (shouldShowNextPatent) {
         const currentPatent = patentes.find((patent) => patent.name === data.data.patenteAtual);
 
@@ -100,20 +115,18 @@ export async function profilePage() {
             const baseExperiencePoints = currentPatent.targetXp;
             const remainingExperiencePoints = Math.max(0, nextExperiencePoints - currentExperiencePoints);
 
+            card.captureSnapshot(SNAPSHOT_KEY_XP);
             card.setBaseXp(baseExperiencePoints);
             card.setRemaining(remainingExperiencePoints);
             card.setNextXp(nextExperiencePoints);
             card.setProgress(currentExperiencePoints, baseExperiencePoints, nextExperiencePoints);
         }
+    }
 
-        if (isOwnProfile) {
-            const rankData = StorageService.get(`${RouteKeys.ExperienceRankingPosition}-${data.data.oidUser}`);
-            if (rankData?.rank) {
-                card.setRankingBadge(rankData.rank);
-            } else if (storedSettings.showExperienceRanking) {
-                card.setRankingBadge(0);
-            }
-        }
+    // ---- Renderização do badge de Ranking de Experiência (independente da Próxima Patente) ----
+    if (shouldShowExperienceRanking) {
+        const rankData = StorageService.get(`${RouteKeys.ExperienceRankingPosition}-${data.data.oidUser}`);
+        card.setRankingBadge(rankData?.rank ?? 0);
     }
 
     // ---- Renderização do card de Fireteam ----
