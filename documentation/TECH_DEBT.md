@@ -46,7 +46,7 @@ Criado `src/data/api-route-keys.js` com `storageKeyGoaRankStatus` e `RouteKeyPro
 
 **Arquivo:** `src/lib/experience-card.js`
 
-**Problema:** A localização dos elementos usa classes CSS do site:
+**Problema:** A localização dos elementos usa classes CSS utilitárias do Tailwind:
 ```js
 element?.closest("div.rounded-lg")
 ".pt-2"
@@ -54,11 +54,11 @@ element?.closest("div.rounded-lg")
 "div.inline-flex.rounded.border > button"
 ```
 
-Qualquer atualização de CSS no FCABR (refatoração, mudança de framework, atualização de Tailwind) quebra silenciosamente a extensão.
+Qualquer atualização de CSS no FCABR (refatoração, bump de Tailwind, mudança de framework) quebra silenciosamente a extensão.
 
-**Impacto:** Alta frequência esperada de quebra em produção.
+**Impacto:** Alta frequência esperada de quebra em produção — manutenção reativa inevitável.
 
-**Solução sugerida:** Usar atributos `data-*` via DOM traversal relativo ao texto localizado, ou `aria-*` attributes que são mais estáveis.
+**Solução em aberto:** O site não expõe atributos `data-*` nem `aria-*` utilizáveis como âncoras estáveis. A única alternativa é traversal relativo a texto visível (ex.: encontrar o span com texto "Experiência"/"Experience" e subir na árvore), o que já é parcialmente feito mas ainda depende de classes para localizar a barra de progresso e o footer. Não há solução definitiva sem mudança no site.
 
 ---
 
