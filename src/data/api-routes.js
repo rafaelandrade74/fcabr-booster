@@ -1,4 +1,4 @@
-import { storageKeyGoaRankStatus } from "../content-scripts/routes/profile.js";
+import { storageKeyGoaRankStatus } from "./api-route-keys.js";
 import {
     storageKeyExperienceRankingPosition,
     storageKeyFireteamClan,

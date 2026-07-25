@@ -7,6 +7,7 @@ import { DEFAULT_SETTINGS } from "../../utils/settings";
 import { getTranslations } from "../../translations";
 import StorageService from "../../lib/storage-service";
 import { RouteKeys } from "../../data/routekeys.js";
+import { RouteKeyProfile } from "../../data/api-route-keys.js";
 
 /**
  * Retorna o tipo da página de perfil.
@@ -25,55 +26,6 @@ function getProfilePageType(pathname = window.location.pathname) {
     }
 
     return match;
-}
-
-/**
- * @param {object}
- * @returns {string|string[]}
- */
-export function storageKeyGoaRankStatus(data) {
-    const oidUser = data.data.oidUser;
-    const nickname = data.data.nickname;
-
-    const keyByOid = RouteKeyProfile(oidUser);
-    const keyByNickname = RouteKeyProfile(nickname);
-
-    // Salva sob as duas chaves: oidUser (lookup PFP) e nickname (lookup PF)
-    return keyByOid === keyByNickname ? keyByOid : [keyByOid, keyByNickname];
-}
-/**
- * 
- * @returns {string}
- */
-function getProfileId() {
-    const profileKey = Object.keys(localStorage)
-        .find(k => k.startsWith("selected-profile-"));
-
-    if (!profileKey)
-        return null;
-
-    const profileValue = Number(localStorage.getItem(profileKey));
-
-    if (Number.isNaN(profileValue))
-        return null;
-
-    return profileValue;
-}
-
-/**
- * 
- * @param {any|null} name 
- * @returns {string}
- */
-function RouteKeyProfile(name = null) {
-    if (name == null || name == undefined) {
-        const oidUser = getProfileId();
-
-        if (oidUser == null) return null;
-        return RouteKeyProfile(oidUser);
-    }
-
-    return `${RouteKeys.GoaRankStatus}-${name}`;
 }
 
 export async function profilePage() {    
