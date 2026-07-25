@@ -2,8 +2,8 @@
 
 ## Arquitetura
 
-### M-001: Resolver a Dependência Circular
-Mover `storageKeyGoaRankStatus` e `RouteKeyProfile` para fora de `routes/profile.js`. Sugestão: criar `src/data/route-helpers.js` com as funções de resolução de chave.
+### ~~M-001: Resolver a Dependência Circular~~ ✅ Implementado
+Criado `src/data/api-route-keys.js` com `storageKeyGoaRankStatus` e `RouteKeyProfile`, eliminando a dependência circular.
 
 ### M-002: Usar `chrome.storage.session` para Cache
 Substituir o `Map` em memória do `StorageService` por `chrome.storage.session` (disponível no MV3). Os dados persistiriam durante a sessão de navegação mas seriam limpos ao fechar o navegador.

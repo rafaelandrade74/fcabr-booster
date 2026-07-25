@@ -6,19 +6,9 @@
 
 ---
 
-#### TD-001: Dependência Circular entre `api-routes.js` e `routes/profile.js`
+#### ~~TD-001: Dependência Circular entre `api-routes.js` e `routes/profile.js`~~ ✅ Resolvido
 
-**Arquivo:** `src/data/api-routes.js` ↔ `src/content-scripts/routes/profile.js`
-
-**Problema:**
-- `api-routes.js` importa `storageKeyGoaRankStatus` de `routes/profile.js`.
-- `routes/profile.js` importa `RouteKeys` de `data/routekeys.js`.
-- `content.js` importa `router.js` que importa `api-routes.js` que importa `profile.js`.
-- `profile.js` é um handler de página — misturar responsabilidades de "como calcular a chave de storage" com "como renderizar a página" é uma violação do SRP.
-
-**Impacto:** A função `storageKeyGoaRankStatus` está no arquivo errado. Ela pertence a `api-routes.js` ou a um arquivo de utils de rota.
-
-**Solução sugerida:** Mover `storageKeyGoaRankStatus` e `RouteKeyProfile` para `api-routes.js` ou criar `src/data/api-route-keys.js`.
+Criado `src/data/api-route-keys.js` com `storageKeyGoaRankStatus` e `RouteKeyProfile`, eliminando a dependência de `api-routes.js` em `routes/profile.js`.
 
 ---
 
