@@ -90,16 +90,9 @@ Entradas `"16"` e `"32"` removidas de `manifest.json`. O objeto `icons` agora de
 
 ---
 
-#### TD-008: LICENSE.md Sem Licença Definida
+#### ~~TD-008: LICENSE.md Sem Licença Definida~~ ✅ Resolvido
 
-**Arquivo:** `LICENSE.md`
-
-**Conteúdo atual:**
-```
-Licença a definir pelo projeto.
-```
-
-**Impacto:** Legalmente ambíguo. Sem licença, o código é "all rights reserved" por default.
+Licença MIT adicionada — permissiva, sem restrições de uso, redistribuição ou modificação, mantendo apenas a exigência de atribuição de copyright.
 
 ---
 
