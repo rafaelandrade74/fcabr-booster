@@ -15,8 +15,8 @@ Implementação testada em branch `test/m-003`. O service worker resolve o probl
 
 ## Robustez / Performance
 
-### M-004: Usar `MutationObserver` Consistentemente
-Substituir o `waitUntil` (polling) pelo `DOM.wait()` (MutationObserver) que já existe mas não é usado. É mais eficiente e reage instantaneamente.
+### M-004: Usar `MutationObserver` Consistentemente — Descartado
+Substituir o `waitUntil` (polling) pelo `DOM.wait()` (MutationObserver) introduziria um loop: cada alteração feita pela própria extensão no DOM dispararia novas mutações, causando re-renderizações em cascata, alto uso de CPU e instabilidade. O polling com `waitUntil` é mais previsível e seguro neste contexto.
 
 ### M-005: Estratégia de Seleção DOM Mais Estável
 Em vez de selecionar por classes CSS do Tailwind (que podem mudar a qualquer deploy do site), usar atributos `data-*` ou `aria-*` quando disponíveis.
