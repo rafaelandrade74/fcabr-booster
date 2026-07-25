@@ -83,16 +83,17 @@ Logs em produção expõem detalhes internos da extensão no console do usuário
 
 **Arquivo:** `src/content-scripts/content.js`
 
-**Problema:**
+**Situação atual:**
 ```js
+// Fallback para casos onde o framework altera a URL sem disparar os eventos acima
 setInterval(checkUrlChange, 200);
 ```
 
-Este intervalo roda indefinidamente enquanto a aba estiver aberta, verificando se a URL mudou. Consome CPU a cada 200ms mesmo quando o usuário não está navegando.
+O intervalo é intencional e está documentado no código — existe como último recurso para navegações SPA que escapam dos patches de `pushState`/`replaceState` e do evento `popstate`. O Next.js (usado pelo fcabr.net) pode alterar a URL via Router interno sem passar pelos mecanismos padrão em alguns cenários (ex.: shallow routing, prefetch).
 
-**Impacto:** Pequeno impacto de performance, mas é um anti-padrão.
+**Impacto real:** Baixo. `checkUrlChange` é uma função trivial (`location.href === lastUrl ? return : renderPage()`); o custo por tick é desprezível. O impacto de falso negativo (não detectar a navegação) seria maior do que o custo do polling.
 
-**Solução sugerida:** Os patches em `pushState`/`replaceState` + `popstate` já cobrem 99% dos casos. O polling poderia ser removido ou ter seu intervalo aumentado para 1000ms.
+**Possível melhoria:** Aumentar o intervalo para 1000ms — a diferença de responsividade seria imperceptível para o usuário e reduziria o número de ticks em 5×. Remover completamente só seria seguro após confirmar que os patches cobrem 100% das navegações do Next.js em uso.
 
 ---
 
