@@ -16,40 +16,6 @@ export default class DOM {
 
         throw new Error("Timeout");
     }
-    static wait(predicate, timeout = 10000) {
-
-        return new Promise((resolve, reject) => {
-
-            const element = predicate();
-
-            if (element)
-                return resolve(element);
-
-            const observer = new MutationObserver(() => {
-
-                const element = predicate();
-
-                if (element) {
-                    observer.disconnect();
-                    resolve(element);
-                }
-
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-
-            setTimeout(() => {
-                observer.disconnect();
-                reject(new Error("Timeout"));
-            }, timeout);
-
-        });
-
-    }
-
     static $(selector, parent = document) {
         return parent.querySelector(selector);
     }

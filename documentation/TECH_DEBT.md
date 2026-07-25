@@ -74,19 +74,9 @@ Intervalo aumentado de 200ms para 1000ms. O polling é fallback intencional para
 
 ---
 
-#### TD-006: Dois Métodos de Espera DOM com Semânticas Sobrepostas
+#### ~~TD-006: Dois Métodos de Espera DOM com Semânticas Sobrepostas~~ ✅ Resolvido
 
-**Arquivo:** `src/lib/dom.js`
-
-**Problema:**
-- `DOM.waitUntil()` — polling com `setTimeout`
-- `DOM.wait()` — `MutationObserver`
-
-Apenas `waitUntil` é usado (`routes/profile.js`). `DOM.wait()` é código morto.
-
-**Impacto:** Confusão para novos desenvolvedores sobre qual usar.
-
-**Solução sugerida:** Remover `DOM.wait()` ou documentar quando usar cada um.
+`DOM.wait()` (MutationObserver) removido de `src/lib/dom.js`. Apenas `DOM.waitUntil()` (polling) permanece, eliminando a ambiguidade.
 
 ---
 
@@ -154,7 +144,7 @@ Os métodos abaixo existem mas não são referenciados em nenhum outro arquivo:
 
 | Método | Referenciado? |
 |---|---|
-| `DOM.wait()` | ❌ Não |
+| ~~`DOM.wait()`~~ | ✅ Removido |
 | `DOM.exists()` | ❌ Não |
 | `DOM.allText()` | ❌ Não |
 | `DOM.attr()` | ❌ Não |
@@ -175,5 +165,5 @@ Os métodos abaixo existem mas não são referenciados em nenhum outro arquivo:
 | `FIXME` | Não encontrado |
 | `HACK` | Não encontrado |
 | Componentes órfãos | Não aplicável (sem framework) |
-| Endpoints sem uso | `DOM.wait()` e vários métodos de `dom.js` |
+| Endpoints sem uso | Vários métodos de `dom.js` (ver TD-011) |
 | Variáveis não utilizadas | `RouteKeys.GoaRankStatus` em `content.js` (importado mas não usado diretamente) |
