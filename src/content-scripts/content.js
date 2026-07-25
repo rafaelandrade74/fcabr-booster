@@ -10,8 +10,15 @@ import { FALLBACK_OID_USER_KEY } from "../data/api-route-keys.js";
 
 // ---- inject.js (fetch interceptor, page world) ----
 
+// Tokens gerados no mundo isolado; pages scripts não têm acesso ao valor.
+// PAGE_TOKEN autentica mensagens page-world → content-world.
+// MANAGER_TOKEN autentica mensagens content-world → monitor-manager (CONFIG_UPDATE).
+const PAGE_TOKEN = crypto.randomUUID();
+const MANAGER_TOKEN = crypto.randomUUID();
+
 const script = document.createElement("script");
 script.src = chrome.runtime.getURL("scripts/content-scripts/inject.js");
+script.dataset.fcabrToken = PAGE_TOKEN;
 script.onload = () => script.remove();
 (document.head || document.documentElement).appendChild(script);
 
@@ -38,6 +45,8 @@ function injectMonitorManager(settings) {
 
     const managerScript = document.createElement("script");
     managerScript.src = managerUrl;
+    managerScript.dataset.fcabrToken = PAGE_TOKEN;
+    managerScript.dataset.fcabrManagerToken = MANAGER_TOKEN;
     managerScript.dataset.experienceRankingEnabled = settings.showExperienceRanking ? "1" : "0";
     managerScript.dataset.experienceRankingInterval = intervalMs;
     managerScript.dataset.fireteamRankingEnabled = isFireteamEnabled ? "1" : "0";
@@ -99,6 +108,7 @@ ConfigDispatcher.subscribe(MONITOR_KEYS, async () => {
     window.postMessage({
         source: "FCABR_EXTENSION",
         type: "CONFIG_UPDATE",
+        token: MANAGER_TOKEN,
         config: {
             experienceRankingEnabled: settings.showExperienceRanking ? "1" : "0",
             experienceRankingInterval: intervalMs,
@@ -127,6 +137,7 @@ window.addEventListener("message", async event => {
 
     if (event.source !== window) return;
     if (event.data?.source !== "FCABR_EXTENSION") return;
+    if (event.data?.token !== PAGE_TOKEN) return;
     if (event.data?.type === "CONFIG_UPDATE") return; // outbound only, not for us
 
     dlog("[FCABR][content] mensagem FCABR_EXTENSION recebida:", event.data);

@@ -3,6 +3,12 @@ import { FALLBACK_OID_USER_KEY } from "../data/api-route-keys.js";
 
 (() => {
 
+    // Tokens lidos antes de o elemento <script> ser removido do DOM.
+    // PAGE_TOKEN autentica mensagens deste script → content-world.
+    // CONFIG_TOKEN autentica CONFIG_UPDATE recebido do content-world.
+    const PAGE_TOKEN = document.currentScript?.dataset.fcabrToken;
+    const CONFIG_TOKEN = document.currentScript?.dataset.fcabrManagerToken;
+
     // ---- Utilitários compartilhados ----
 
     function getCurrentUserId() {
@@ -51,7 +57,7 @@ import { FALLBACK_OID_USER_KEY } from "../data/api-route-keys.js";
 
     function postExtensionMessage(url, data) {
         dlog("[FCABR][monitor-manager] postExtensionMessage:", url, data);
-        window.postMessage({ source: "FCABR_EXTENSION", url, data });
+        window.postMessage({ source: "FCABR_EXTENSION", token: PAGE_TOKEN, url, data });
     }
 
     // ---- BaseMonitor ----
@@ -310,6 +316,7 @@ import { FALLBACK_OID_USER_KEY } from "../data/api-route-keys.js";
     window.addEventListener("message", event => {
         if (event.source !== window) return;
         if (event.data?.source !== "FCABR_EXTENSION") return;
+        if (event.data?.token !== CONFIG_TOKEN) return;
         if (event.data?.type !== "CONFIG_UPDATE") return;
         dlog("[FCABR][monitor-manager] CONFIG_UPDATE recebido:", event.data.config);
         manager.update(event.data.config);

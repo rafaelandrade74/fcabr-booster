@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Corrige injeção de dados via `postMessage` forjado: tokens UUID gerados no content script (mundo isolado) autenticam cada canal de comunicação entre scripts da página e o content script, impedindo que scripts maliciosos injetem dados ou alterem configurações dos monitores
+- Configura modos `development` e `production` corretamente no webpack: `npm run dev` gera bundle não-minificado com source maps e `__FCABR_DEBUG__` ativo; `npm run build` e `npm run release` geram bundle otimizado sem debug
+
 ## 0.4.2
 
 - Implementa Hot Reload das configurações via `ConfigDispatcher`: alterações no popup são refletidas imediatamente na página sem recarregar a aba

@@ -1,5 +1,7 @@
 (() => {
 
+    const TOKEN = document.currentScript?.dataset.fcabrToken;
+
     const originalFetch = window.fetch.bind(window);
 
     window.fetch = async (...args) => {
@@ -21,6 +23,7 @@
 
             window.postMessage({
                 source: "FCABR_EXTENSION",
+                token: TOKEN,
                 url: url,
                 data
             });
