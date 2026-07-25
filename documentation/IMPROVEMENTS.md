@@ -8,8 +8,8 @@ Criado `src/data/api-route-keys.js` com `storageKeyGoaRankStatus` e `RouteKeyPro
 ### M-002: Cache entre Reloads — Descartado
 `chrome.storage.session` e `sessionStorage` do site foram testados e ambos lançam `"Access to storage is not allowed from this context"` no contexto de content script. O `Map` em memória é a única opção viável — mantido como está.
 
-### M-003: Background Service Worker
-Adicionar um service worker para centralizar a lógica de armazenamento e evitar a necessidade de postMessage entre Main World e Isolated World para dados de API.
+### M-003: Background Service Worker — Descartado
+Implementação testada em branch `test/m-003`. O service worker resolve o problema de postMessage entre mundos, mas introduz riscos de compatibilidade cross-browser (Firefox tem suporte parcial a `chrome.alarms` e ao ciclo de vida de SW em MV3) e não persiste entre reloads sem `chrome.storage.local` assíncrono, o que exigiria refatorar toda a leitura do `StorageService` para async. Complexidade de implementação supera o benefício atual — mantido o `monitor-manager.js` no Main World.
 
 ---
 
