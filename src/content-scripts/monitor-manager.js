@@ -238,6 +238,43 @@ import { FALLBACK_OID_USER_KEY } from "../data/api-route-keys.js";
                 monitor.execute();
             }
         }
+
+        /**
+         * Aplica uma nova configuração em tempo real (hot-reload).
+         * Inicia, para ou reconfigura cada monitor conforme necessário.
+         * @param {{ [key: string]: string | number }} config
+         */
+        update(config) {
+            for (const entry of MonitorRegistry) {
+                const nowEnabled = config[entry.enabledKey] === "1";
+                const wasRunning = this._timers.has(entry.id);
+                const newInterval = Math.max(
+                    entry.MonitorClass.MIN_INTERVAL_MS,
+                    Number(config[entry.intervalKey]) || entry.MonitorClass.MIN_INTERVAL_MS
+                );
+
+                if (wasRunning && !nowEnabled) {
+                    clearInterval(this._timers.get(entry.id));
+                    this._timers.delete(entry.id);
+                    this._monitors.delete(entry.id);
+                    dlog("[FCABR][ApiMonitorManager] monitor parado:", entry.id);
+                } else if (!wasRunning && nowEnabled) {
+                    const monitor = new entry.MonitorClass(newInterval);
+                    this._monitors.set(entry.id, monitor);
+                    monitor.execute();
+                    this._timers.set(entry.id, setInterval(() => monitor.execute(), newInterval));
+                    dlog("[FCABR][ApiMonitorManager] monitor iniciado:", entry.id, "interval:", newInterval);
+                } else if (wasRunning && nowEnabled) {
+                    const currentMonitor = this._monitors.get(entry.id);
+                    if (currentMonitor.intervalMs !== newInterval) {
+                        clearInterval(this._timers.get(entry.id));
+                        currentMonitor.intervalMs = newInterval;
+                        this._timers.set(entry.id, setInterval(() => currentMonitor.execute(), newInterval));
+                        dlog("[FCABR][ApiMonitorManager] interval atualizado:", entry.id, "->", newInterval);
+                    }
+                }
+            }
+        }
     }
 
     // document.currentScript só está disponível durante a execução síncrona do script
@@ -267,5 +304,14 @@ import { FALLBACK_OID_USER_KEY } from "../data/api-route-keys.js";
             manager.refresh();
         }
     }, 1000);
+
+    // Hot-reload: recebe atualizações de configuração do content script
+    window.addEventListener("message", event => {
+        if (event.source !== window) return;
+        if (event.data?.source !== "FCABR_EXTENSION") return;
+        if (event.data?.type !== "CONFIG_UPDATE") return;
+        dlog("[FCABR][monitor-manager] CONFIG_UPDATE recebido:", event.data.config);
+        manager.update(event.data.config);
+    });
 
 })();

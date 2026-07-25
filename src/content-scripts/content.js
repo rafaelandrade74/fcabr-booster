@@ -1,23 +1,30 @@
 import { routes } from "./router.js";
 import { profilePage } from "./routes/profile.js";
 import StorageService from "../lib/storage-service.js";
+import ConfigDispatcher from "../lib/config-dispatcher.js";
 import { RouteKeys } from "../data/routekeys.js";
 import { initializeStoredValues } from "../utils/index.js";
 import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS } from "../utils/settings.js";
 import { dlog, dwarn, derror } from "../utils/debug-log.js";
 import { FALLBACK_OID_USER_KEY } from "../data/api-route-keys.js";
 
-const script = document.createElement("script");
+// ---- inject.js (fetch interceptor, page world) ----
 
+const script = document.createElement("script");
 script.src = chrome.runtime.getURL("scripts/content-scripts/inject.js");
 script.onload = () => script.remove();
-
 (document.head || document.documentElement).appendChild(script);
 
-initializeStoredValues(DEFAULT_SETTINGS).then(settings => {
-    dlog("[FCABR][monitor-manager] settings carregadas:", settings, "userAgent:", navigator.userAgent);
+// ---- monitor-manager injection ----
 
-    const isFireteamEnabled = settings.showFireteamClanRank || settings.showFireteamPlayerRank || settings.showFireteamPoints || settings.showFireteamPlayerXp;
+let monitorManagerInjected = false;
+
+function injectMonitorManager(settings) {
+    if (monitorManagerInjected) return;
+
+    const isFireteamEnabled = settings.showFireteamClanRank || settings.showFireteamPlayerRank
+        || settings.showFireteamPoints || settings.showFireteamPlayerXp;
+
     if (!settings.showExperienceRanking && !isFireteamEnabled) {
         dwarn("[FCABR][monitor-manager] monitor NÃO iniciado: nenhuma flag habilitada", {
             showExperienceRanking: settings.showExperienceRanking,
@@ -42,28 +49,85 @@ initializeStoredValues(DEFAULT_SETTINGS).then(settings => {
     managerScript.onerror = event => {
         derror("[FCABR][monitor-manager] FALHA ao carregar o script:", managerUrl, event);
     };
+
     dlog("[FCABR][monitor-manager] injetando script:", managerUrl, managerScript.dataset);
     (document.head || document.documentElement).appendChild(managerScript);
+    monitorManagerInjected = true;
+}
+
+// ---- Hot Reload — ConfigDispatcher ----
+
+ConfigDispatcher.init();
+
+// Keys that affect what is rendered in the profile page
+const RENDER_KEYS = [
+    "showNextPatent", "showExperienceRanking",
+    "showFireteamClanRank", "showFireteamPlayerRank",
+    "showFireteamPoints", "showFireteamPlayerPoints", "showFireteamPlayerXp",
+];
+
+ConfigDispatcher.subscribe(RENDER_KEYS, () => {
+    dlog("[FCABR][config-dispatcher] configuração de renderização alterada, atualizando página");
+    renderPage();
 });
 
+// Keys that affect whether/how monitors run
+const MONITOR_KEYS = [
+    "showExperienceRanking",
+    "showFireteamClanRank", "showFireteamPlayerRank",
+    "showFireteamPoints", "showFireteamPlayerPoints", "showFireteamPlayerXp",
+    "rankingInterval",
+];
+
+ConfigDispatcher.subscribe(MONITOR_KEYS, async () => {
+    const settings = await initializeStoredValues(DEFAULT_SETTINGS);
+    const isFireteamEnabled = settings.showFireteamClanRank || settings.showFireteamPlayerRank
+        || settings.showFireteamPoints || settings.showFireteamPlayerXp;
+    const intervalMs = Math.max(MIN_RANKING_INTERVAL_MS, Number(settings.rankingInterval));
+
+    if (!monitorManagerInjected) {
+        // Monitor was disabled at boot — inject it now that a flag was enabled
+        if (settings.showExperienceRanking || isFireteamEnabled) {
+            dlog("[FCABR][config-dispatcher] injetando monitor-manager após habilitação via popup");
+            injectMonitorManager(settings);
+        }
+        return;
+    }
+
+    // Relay the updated config to monitor-manager running in the page world
+    dlog("[FCABR][config-dispatcher] retransmitindo CONFIG_UPDATE para monitor-manager");
+    window.postMessage({
+        source: "FCABR_EXTENSION",
+        type: "CONFIG_UPDATE",
+        config: {
+            experienceRankingEnabled: settings.showExperienceRanking ? "1" : "0",
+            experienceRankingInterval: intervalMs,
+            fireteamRankingEnabled: isFireteamEnabled ? "1" : "0",
+            fireteamRankingInterval: intervalMs,
+        },
+    });
+});
+
+// ---- Initial boot ----
+
+initializeStoredValues(DEFAULT_SETTINGS).then(settings => {
+    dlog("[FCABR][monitor-manager] settings carregadas:", settings, "userAgent:", navigator.userAgent);
+    injectMonitorManager(settings);
+});
+
+// ---- Page rendering ----
 
 function renderPage() {
-
     const route = routes.PageRoutes.find(r => r.regex.test(location.pathname));
-
-    if (!route)
-        return;
-
+    if (!route) return;
     route.handler();
 }
 
 window.addEventListener("message", async event => {
 
-    if (event.source !== window)
-        return;
-
-    if (event.data?.source !== "FCABR_EXTENSION")
-        return;
+    if (event.source !== window) return;
+    if (event.data?.source !== "FCABR_EXTENSION") return;
+    if (event.data?.type === "CONFIG_UPDATE") return; // outbound only, not for us
 
     dlog("[FCABR][content] mensagem FCABR_EXTENSION recebida:", event.data);
 
@@ -99,7 +163,6 @@ window.addEventListener("message", async event => {
         StorageService.set(key, event.data.data);
     }
 
-    // renderizar a página novamente para atualizar os dados exibidos
     dlog("[FCABR][content] chamando renderPage() após atualizar storage");
     renderPage();
 });
@@ -119,16 +182,11 @@ localStorage.setItem = function(key, value) {
 window.addEventListener("DOMContentLoaded", () => {
 
     const checkUrlChange = () => {
-
-        if (location.href === lastUrl)
-            return;
-
+        if (location.href === lastUrl) return;
         lastUrl = location.href;
-
         renderPage();
     };
 
-    // Navegação SPA
     const pushState = history.pushState;
     history.pushState = function (...args) {
         pushState.apply(this, args);
@@ -141,22 +199,18 @@ window.addEventListener("DOMContentLoaded", () => {
         checkUrlChange();
     };
 
-    // Voltar/avançar navegador
     window.addEventListener("popstate", checkUrlChange);
 
     // Fallback para casos onde o framework altera a URL sem disparar os eventos acima
     setInterval(checkUrlChange, 200);
     renderPage();
 });
+
 // atualizar os componentes da página quando a janela for redimensionada
 let isMobile = window.innerWidth <= 1023;
 window.addEventListener("resize", () => {
     const mobile = window.innerWidth <= 1023;
-
-    if (mobile === isMobile)
-        return;
-
+    if (mobile === isMobile) return;
     isMobile = mobile;
-
     renderPage();
 });

@@ -80,6 +80,14 @@ export async function profilePage() {
         storedSettings.showFireteamPlayerXp
     );
 
+    // Hot-reload cleanup: remove our injected nodes when their feature is disabled
+    if (!shouldShowAnyFireteam) {
+        document.querySelectorAll(`[${FIRETEAM_CONTAINER_ATTR}]`).forEach(el => el.remove());
+    }
+    if (!shouldShowNextPatent || !storedSettings.showExperienceRanking) {
+        document.querySelectorAll("[data-fcabr-badge-container]").forEach(el => el.remove());
+    }
+
     if (!shouldShowNextPatent && !shouldShowAnyFireteam) return;
 
     // Aguardar até que o elemento de Experiência esteja presente na página.
