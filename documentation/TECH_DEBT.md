@@ -84,23 +84,9 @@ Intervalo aumentado de 200ms para 1000ms. O polling é fallback intencional para
 
 ---
 
-#### TD-007: Ícones de Diferentes Tamanhos Apontando para o Mesmo Arquivo
+#### ~~TD-007: Ícones de Diferentes Tamanhos Apontando para o Mesmo Arquivo~~ ✅ Resolvido
 
-**Arquivo:** `manifest.json`
-
-**Problema:**
-```json
-"icons": {
-  "16": "images/icon-48.png",
-  "32": "images/icon-48.png",
-  "48": "images/icon-48.png",
-  "128": "images/icon-128.png"
-}
-```
-
-Ícones de 16px e 32px apontam para um arquivo de 48px. O navegador vai redimensionar.
-
-**Solução sugerida:** Criar ícones específicos para cada tamanho.
+Entradas `"16"` e `"32"` removidas de `manifest.json`. O objeto `icons` agora declara apenas os tamanhos com arquivos reais: `48` e `128`.
 
 ---
 
