@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Adiciona ESLint com `globals` para contexto de WebExtension: globals `chrome`/`browser` declarados para content scripts, background e popup; `inject.js` marcado sem esses globals pois roda no Main World — uso acidental de `chrome.*` ali vira erro de lint; adiciona script `npm run lint`
+- Remove imports redundantes (`profilePage`, `RouteKeys`) de `content.js`; ambos já chegam transitivamente via `router.js` → `page-routes.js`
+- Corrige `let` → `const` em `experience-card.js`
 - Corrige injeção de dados via `postMessage` forjado: tokens UUID gerados no content script (mundo isolado) autenticam cada canal de comunicação entre scripts da página e o content script, impedindo que scripts maliciosos injetem dados ou alterem configurações dos monitores
 - Configura modos `development` e `production` corretamente no webpack: `npm run dev` gera bundle não-minificado com source maps e `__FCABR_DEBUG__` ativo; `npm run build` e `npm run release` geram bundle otimizado sem debug
 - Aumenta intervalo do polling de detecção de URL de 200ms para 1000ms, reduzindo ticks em 5× sem impacto perceptível na responsividade da navegação SPA

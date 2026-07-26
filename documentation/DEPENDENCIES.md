@@ -15,6 +15,8 @@ O projeto não tem dependências de runtime (`dependencies` no `package.json`). 
 | `html-webpack-plugin` | ^5.6.0 | Gera o `popup.html` no dist a partir do template |
 | `copy-webpack-plugin` | ^12.0.2 | Copia `public/` e `manifest.json` para `dist/` sem processamento |
 | `archiver` | ^6.0.2 | Gera o zip de release (`npm run release`) |
+| `eslint` | ^9.x | Linter estático — detecta erros, padrões inseguros e uso indevido de APIs |
+| `globals` | ^17.x | Conjuntos de variáveis globais por ambiente (browser, node, webextension) |
 
 ---
 

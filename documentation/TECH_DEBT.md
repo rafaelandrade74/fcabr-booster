@@ -130,4 +130,4 @@ Todos os métodos sem uso externo removidos. `src/lib/dom.js` agora expõe apena
 | `HACK` | Não encontrado |
 | Componentes órfãos | Não aplicável (sem framework) |
 | Endpoints sem uso | Vários métodos de `dom.js` (ver TD-011) |
-| Variáveis não utilizadas | `RouteKeys.GoaRankStatus` em `content.js` (importado mas não usado diretamente) |
+| Variáveis não utilizadas | Nenhuma — imports redundantes de `content.js` removidos (M-013) |
