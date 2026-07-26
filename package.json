@@ -6,11 +6,14 @@
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
-    "release": "webpack --mode production && node scripts/release.js"
+    "release": "webpack --mode production && node scripts/release.js",
+    "lint": "eslint src/"
   },
   "devDependencies": {
     "archiver": "^6.0.2",
     "copy-webpack-plugin": "^12.0.2",
+    "eslint": "^10.8.0",
+    "globals": "^17.7.0",
     "html-webpack-plugin": "^5.6.0",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"

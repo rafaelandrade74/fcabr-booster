@@ -75,7 +75,7 @@ export default class ExperienceCard {
 
     /** @returns {Array<HTMLSpanElement>} */
     getFooterSpans() {
-        let footer = this.getFooter();
+        const footer = this.getFooter();
         return footer ? Array.from(footer.querySelectorAll("span")) : [];
     }
 

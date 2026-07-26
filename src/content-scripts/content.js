@@ -1,8 +1,6 @@
 import { routes } from "./router.js";
-import { profilePage } from "./routes/profile.js";
 import StorageService from "../lib/storage-service.js";
 import ConfigDispatcher from "../lib/config-dispatcher.js";
-import { RouteKeys } from "../data/routekeys.js";
 import { initializeStoredValues } from "../utils/index.js";
 import { DEFAULT_SETTINGS, MIN_RANKING_INTERVAL_MS } from "../utils/settings.js";
 import { dlog, dwarn, derror } from "../utils/debug-log.js";
