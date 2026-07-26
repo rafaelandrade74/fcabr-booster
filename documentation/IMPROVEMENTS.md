@@ -68,8 +68,8 @@ Potenciais configurações futuras:
 ### M-012: Criar Ícones de Múltiplos Tamanhos
 Criar `icon-16.png`, `icon-32.png` para qualidade visual nos menus do navegador.
 
-### M-013: Adicionar `eslint-plugin` para Extensões
-`eslint-plugin-webextensions` ou regras customizadas para validar uso correto das APIs do browser.
+### ~~M-013: Adicionar `eslint-plugin` para Extensões~~ ✅ Implementado
+ESLint configurado com `globals` (`eslint.config.mjs`). Globals `chrome`/`browser` definidos para os contextos de extensão; `inject.js` marcado explicitamente sem esses globals (roda no Main World) — uso acidental de `chrome.*` ali vira erro de lint. Script `npm run lint` adicionado.
 
 ### M-014: Suporte a `XMLHttpRequest` no inject.js
 Atualmente apenas `fetch` é interceptado. Chamadas XHR nativas da página não são capturadas.
